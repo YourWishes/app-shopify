@@ -1,0 +1,44 @@
+{
+  "name": "@yourwishes/app-shopify",
+  "version": "0.0.1",
+  "description": "Shopify Module for Shopify Apps using the App Framework",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "jest",
+    "start": "npm run build:live",
+    "build": "tsc -p ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YourWishes/app-server.git"
+  },
+  "keywords": [
+    "server",
+    "app-shopify",
+    "framework",
+    "shopify",
+    "app",
+    "apps"
+  ],
+  "author": "Dominic Masters <dominic@domsplace.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/YourWishes/app-shopify/issues"
+  },
+  "homepage": "https://github.com/YourWishes/app-shopify#readme",
+  "devDependencies": {
+    "@types/jest": "^23.3.10",
+    "@types/node": "^10.12.12",
+    "jest": "^23.6.0",
+    "ts-jest": "^23.10.5",
+    "ts-node": "^7.0.1",
+    "typescript": "^3.2.2"
+  },
+  "dependencies": {
+    "@yourwishes/app-database": "^1.0.2",
+    "@yourwishes/app-server": "^1.0.5",
+    "@yourwishes/shopify-utils": "^1.0.4",
+    "cross-fetch": "^3.0.0",
+    "shopify-api-node": "^2.17.0"
+  }
+}
