@@ -22,7 +22,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import * as Shopify from 'shopify-api-node';
-import { ICallLimits } from 'shopify-api-node';
+import { ICallLimits, IAccessScope } from 'shopify-api-node';
 import { ShopifyShop } from './ShopifyShop';
 import { ShopifyTaskRequest } from './ShopifyTask';
 import { IShopifyApp } from './../app/';
@@ -34,7 +34,7 @@ export interface IShopifyPrivateToken { apiKey:string, password:string, scopes?:
 export class ShopifyToken {
   token:IShopifyPublicToken|IShopifyPrivateToken;
   shop:ShopifyShop;
-  scopes:string[];
+  scopes:string[]=[];
 
   processingTasks:ShopifyTaskRequest[]=[];
 
@@ -88,7 +88,7 @@ export class ShopifyToken {
     this.startTask(task);
 
     //Wait for it...
-    let scopes = await task.wait();
+    let scopes:IAccessScope[] = await task.wait();
 
     //Store
     this.scopes = scopes.map(e => e.handle);
@@ -117,13 +117,21 @@ export class ShopifyToken {
 
   async delete() {
     let app = this.shop.shopify.app as IShopifyApp;
+    this.shop.removeToken(this);
+    if(!this.token['accessToken']) return;
     let token = this.token as IShopifyPublicToken;
-    await deleteToken(app.database, this.shop.shopName, token.accessToken);
+    try {
+      await deleteToken(app.database, this.shop.shopName, token.accessToken);
+    } catch(e) {
+      this.shop.shopify.logger.error(`Failed to delete token ${token.accessToken}`);
+      this.shop.shopify.logger.error(e);
+    }
   }
 
   async save() {
     let app = this.shop.shopify.app as IShopifyApp;
     let token = this.token as IShopifyPublicToken;
+    if(!token.accessToken) return;
     await insertToken(app.database, this.shop.shopName, token.accessToken, new Date());
   }
 

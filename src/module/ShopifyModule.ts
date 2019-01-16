@@ -23,14 +23,15 @@
 
 import { IShopifyApp } from './../app/';
 import { Module } from '@yourwishes/app-base';
-import { generateInstallUrl } from '@yourwishes/shopify-utils';
+import { generateInstallUrl, isValidShopName } from '@yourwishes/shopify-utils';
 import { shopAuth, getInstallUrl } from './../api/';
 import * as crypto from 'crypto';
 
-import { ShopifyShop } from './../shopify';
+import { ShopifyShop, ShopifyToken } from './../shopify';
 
 import {
-  createNoncesTable, createTokensTable
+  createNoncesTable, createTokensTable,
+  getAccessTokens
 } from './../queries/';
 
 export const CONFIG_KEY = 'shopify.key';
@@ -92,19 +93,40 @@ export class ShopifyModule extends Module {
 
     app.server.addAPIHandler(this.shopAuthHandler);
     app.server.addAPIHandler(this.getInstallUrlHandler);
+
+    //Now finally load our stores
+    let tokens = await getAccessTokens(app.database);
+    tokens.forEach(token => {
+      try {
+        let shop = this.getOrCreateShop(token.shop);
+        let t = new ShopifyToken(shop, token);
+        shop.addToken(t);
+      } catch(e) {
+        this.logger.error(`Failed to load token!`);
+        this.logger.error(e);
+      }
+    });
+
+    //Verify all tokens
+    Object.entries(this.shops).forEach(([k,shop]) => {
+      shop.verifyTokens();
+    });
   }
+
+  removeShop(shop) { delete this.shops[shop.shopName]; }
 
   getInstallUrl(shop:string, nonce:string, scopes:string[]) {
     //Same as the one from the util but we are going to pass the config values
     return generateInstallUrl(shop, this.apiKey, scopes, this.redirectUrl, nonce);
   }
 
-  generateNonce():string {
-    return crypto.randomBytes(16).toString('base64');
-  }
-
   getOrCreateShop(shopName:string) {
+    if(!isValidShopName(shopName)) throw new Error("Cannot create a shop for an invalid shop name!");
     if(this.shops[shopName]) return this.shops[shopName];
     return this.shops[shopName] = new ShopifyShop(this, shopName);
+  }
+
+  generateNonce():string {
+    return crypto.randomBytes(16).toString('base64');
   }
 }

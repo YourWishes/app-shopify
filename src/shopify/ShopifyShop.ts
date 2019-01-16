@@ -52,13 +52,15 @@ export class ShopifyShop {
   removeToken(token:ShopifyToken) {
     if(token == null) throw new Error("Invalid Token");
     let index = this.tokens.indexOf(token);
+    if(index === -1) return;
     this.tokens.splice(index, 1);
   }
 
   async verifyTokens() {
     //This will verify each token in the shop.
-    let promises = this.tokens.map(token => token.verify());
-    let results = await Promise.all(promises);
+    let tokens = [...this.tokens];//Duplicate for modified arrays.
+    let promises = tokens.map(token => token.verify());
+    if(this.tokens.length === 0) this.shopify.removeShop(this);
   }
 
   checkPending() {

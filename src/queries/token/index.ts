@@ -36,7 +36,7 @@ export const createTokensTable = (db:DatabaseConnection):Promise<void> => {
   );`);
 };
 
-export const insertToken = (db:DatabaseConnection, shop:string, accessToken:string, timestamp:Date) => {
+export const insertToken = (db:DatabaseConnection, shop:string, accessToken:string, timestamp:Date):Promise<TokenRecord> => {
   return db.one(
     'INSERT INTO "ShopifyTokens" ("shop", "accessToken", "timestamp") VALUES (${shop}, ${accessToken}, ${timestamp}) RETURNING *;',
     { shop, accessToken, timestamp }
@@ -46,3 +46,7 @@ export const insertToken = (db:DatabaseConnection, shop:string, accessToken:stri
 export const deleteToken = (db:DatabaseConnection, shop:string, accessToken:string) => {
   return db.query('DELETE FROM "ShopifyTokens" WHERE "shop"=${shop} AND "accessToken"=${accessToken};', { shop, accessToken });
 }
+
+export const getAccessTokens = (db:DatabaseConnection):Promise<TokenRecord[]> => {
+  return db.any('SELECT * FROM "ShopifyTokens";');
+};
