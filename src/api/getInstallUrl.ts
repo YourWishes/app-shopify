@@ -22,18 +22,18 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-
-import { APIRequest, APIResponse, APIHandler, RESPONSE_OK, RESPONSE_INTERNAL_ERROR } from '@yourwishes/app-server';
+import { RESPONSE_OK, RESPONSE_INTERNAL_ERROR } from '@yourwishes/app-api';
+import { ServerAPIRequest, ServerAPIResponse, ServerAPIHandler } from '@yourwishes/app-server';
 import { isValidShopName } from '@yourwishes/shopify-utils';
 import { IShopifyApp } from './../app/';
 import { insertNonce, deleteNonceForShop } from './../queries/nonce/';
 
-export class getInstallUrl extends APIHandler {
+export class getInstallUrl extends ServerAPIHandler {
   constructor() {
     super('GET', '/shopify/getInstallUrl');
   }
 
-  async onRequest(request:APIRequest):Promise<APIResponse> {
+  async onRequest(request:ServerAPIRequest):Promise<ServerAPIResponse> {
     if(!request.hasString('shop', 128)) return { code: 400, data: 'Missing or Invalid shop' };
 
     let app = request.server.app as IShopifyApp;

@@ -28,6 +28,7 @@ import { shopAuth, getInstallUrl } from './../api/';
 import * as crypto from 'crypto';
 
 import { ShopifyShop, ShopifyToken } from './../shopify';
+import { ShopifyUpdateable } from './../update';
 
 import {
   createNoncesTable, createTokensTable,
@@ -54,6 +55,8 @@ export class ShopifyModule extends Module {
 
   constructor(app:IShopifyApp) {
     super(app);
+
+    app.updateChecker.addUpdateable(new ShopifyUpdateable(app));
   }
 
   async init():Promise<void> {

@@ -36,22 +36,25 @@ export class ShopifyTaskRequest {
   token:ShopifyToken;
 
   promise:Promise<any>;
-  result:any = null;
-  error:any = null;
+  result:any;
+  error:any;
 
   id:number;
 
-  interval:NodeJS.Timeout;
+  interval:NodeJS.Immediate;
   resolve:(value?:any) => void = null;
   reject:(reason?:any) => void = null;
 
   constructor(task:ShopifyTask, priority?:number) {
+    if(!task) throw new Error("Invalid task supplied.");
     this.task = task;
     this.priority = priority || PRIORITY_MEDIUM;
     this.queued = new Date();
   }
 
   start(token:ShopifyToken) {
+    if(!token) throw new Error("Invalid token supplied");
+
     //Track our token
     this.token = token;
     this.id = Math.round(Math.random()*1000000);
@@ -62,7 +65,7 @@ export class ShopifyTaskRequest {
       throw new Error("Passed Task Function is not a valid async function, or does not return a valid promise!");
     }
 
-    this.interval = setInterval(this.checkTask.bind(this), 1);
+    this.interval = setImmediate(() => this.checkTask());
 
     promise.then((result) => {
       this.onTaskFinished(result);
@@ -102,6 +105,8 @@ export class ShopifyTaskRequest {
   }
 
   checkTask() {
+    this.interval = setImmediate(() => this.checkTask());
+
     //Has it failed/succeeded?
     if(this.result == null && this.error == null) return;
     if(this.reject == null || this.resolve == null) return;
@@ -115,7 +120,7 @@ export class ShopifyTaskRequest {
   }
 
   stopTask() {
-    clearInterval(this.interval);
+    clearImmediate(this.interval);
     this.interval = null;
   }
 };

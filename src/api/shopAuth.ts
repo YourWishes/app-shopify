@@ -21,7 +21,8 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { APIRequest, APIResponse, APIHandler, RESPONSE_OK, RESPONSE_INTERNAL_ERROR } from '@yourwishes/app-server';
+import { RESPONSE_OK, RESPONSE_INTERNAL_ERROR } from '@yourwishes/app-api';
+import { ServerAPIRequest, ServerAPIResponse, ServerAPIHandler } from '@yourwishes/app-server';
 import { encodeObject, isValidShopName, generateShopUrl } from '@yourwishes/shopify-utils';
 import * as crypto from 'crypto';
 import { IShopifyApp } from './../app/';
@@ -34,12 +35,12 @@ export const NONCE_TIMEOUT_MS = 10*60*1000;
 export interface TokenResponse { access_token:string, scope:string };
 export const getAccessTokenUrl = (shop:string) =>  generateShopUrl(shop, '/admin/oauth/access_token');
 
-export class shopAuth extends APIHandler {
+export class shopAuth extends ServerAPIHandler {
   constructor(url:string|string[]) {
     super('GET', url);
   }
 
-  async onRequest(request:APIRequest):Promise<APIResponse> {
+  async onRequest(request:ServerAPIRequest):Promise<ServerAPIResponse> {
     //https://help.shopify.com/en/api/getting-started/authentication/oauth
     if(!request.hasString('code', 32)) return { code: 403, data: 'Missing or Invalid code' };
     if(!request.hasString('hmac', 64)) return { code: 403, data: 'Missing or Invalid hmac' };

@@ -108,10 +108,10 @@ describe('verifyTokens', () => {
     let shop = module.getOrCreateShop(DummyName);
 
     let tokenA = new ShopifyToken(shop, {accessToken:'1234'});
-    let verifyA = tokenA.verify = jest.fn(() => true);
+    let verifyA = tokenA.verify = jest.fn(() => true) as any;
 
     let tokenB = new ShopifyToken(shop,{accessToken:'5678'});
-    let verifyB = tokenB.verify = jest.fn(() => true);
+    let verifyB = tokenB.verify = jest.fn(() => true) as any;
 
     shop.addToken(tokenA);
     shop.addToken(tokenB);
