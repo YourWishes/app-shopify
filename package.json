@@ -1,6 +1,6 @@
 {
   "name": "@yourwishes/app-shopify",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "description": "Shopify Module for Shopify Apps using the App Framework",
   "main": "dist/index.js",
   "scripts": {
@@ -34,9 +34,9 @@
     "typescript": "^3.2.2"
   },
   "dependencies": {
-    "@yourwishes/app-base": "^1.4.1",
-    "@yourwishes/app-database": "^1.1.0",
-    "@yourwishes/app-server": "^1.0.5",
+    "@yourwishes/app-base": "^1.4.2",
+    "@yourwishes/app-database": "^1.2.0",
+    "@yourwishes/app-server": "^1.2.0",
     "@yourwishes/shopify-utils": "^1.0.4",
     "cross-fetch": "^3.0.0",
     "shopify-api-node": "^2.17.0"

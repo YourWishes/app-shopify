@@ -40,26 +40,26 @@
   dependencies:
     "@yourwishes/app-base" "^1.1.1"
 
-"@yourwishes/app-base@^1.1.1", "@yourwishes/app-base@^1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@yourwishes/app-base/-/app-base-1.4.1.tgz#02836e763fa31f791c47cb72f1af781b32888bef"
+"@yourwishes/app-base@^1.1.1", "@yourwishes/app-base@^1.4.2":
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/@yourwishes/app-base/-/app-base-1.4.2.tgz#0d370603d6db34b140375d33fcaf95724564343a"
   dependencies:
     cross-fetch "^3.0.1"
     node-cache "^4.2.0"
 
-"@yourwishes/app-database@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@yourwishes/app-database/-/app-database-1.1.0.tgz#76c101f8b0a5d3863404b7702de0b2a1e834a6b0"
+"@yourwishes/app-database@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@yourwishes/app-database/-/app-database-1.2.0.tgz#7cdb8b18ac82582ec36b5660d8e9066f3a103c30"
   dependencies:
-    "@yourwishes/app-base" "^1.4.1"
+    "@yourwishes/app-base" "^1.4.2"
     pg-promise "^8.5.3"
 
-"@yourwishes/app-server@^1.0.5":
-  version "1.1.5"
-  resolved "https://registry.yarnpkg.com/@yourwishes/app-server/-/app-server-1.1.5.tgz#019df53eca813facd20c0f3fc57ca7c8f50aafdc"
+"@yourwishes/app-server@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@yourwishes/app-server/-/app-server-1.2.0.tgz#4639a3ad528a1edcaea339e0481ed55fd71b7959"
   dependencies:
     "@yourwishes/app-api" "^1.0.0"
-    "@yourwishes/app-base" "^1.4.1"
+    "@yourwishes/app-base" "^1.4.2"
     body-parser "^1.18.3"
     express "^4.16.4"
 
