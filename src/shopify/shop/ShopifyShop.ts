@@ -22,9 +22,9 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import { isValidShopName } from '@yourwishes/shopify-utils';
-import { ShopifyToken } from './ShopifyToken';
-import { ShopifyTask, ShopifyTaskRequest } from './ShopifyTask';
-import { ShopifyModule } from './../module/';
+import { ShopifyToken } from './../token/ShopifyToken';
+import { ShopifyTask, ShopifyTaskRequest } from './../task/ShopifyTask';
+import { ShopifyModule } from './../../module/';
 
 export class ShopifyShop {
   shopName:string;

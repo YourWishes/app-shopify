@@ -23,10 +23,10 @@
 
 import * as Shopify from 'shopify-api-node';
 import { ICallLimits, IAccessScope } from 'shopify-api-node';
-import { ShopifyShop } from './ShopifyShop';
-import { ShopifyTaskRequest } from './ShopifyTask';
-import { IShopifyApp } from './../app/';
-import { insertToken, deleteToken } from './../queries/';
+import { ShopifyShop } from './../shop/';
+import { ShopifyTaskRequest } from './../task/';
+import { IShopifyApp } from './../../app/';
+import { insertToken, deleteToken } from './../../queries/';
 
 export interface IShopifyPublicToken { accessToken:string, scopes?:string[] };
 export interface IShopifyPrivateToken { apiKey:string, password:string, scopes?:string[] };

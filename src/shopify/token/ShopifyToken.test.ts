@@ -1,7 +1,5 @@
-import { ShopifyToken, ShopifyShop } from './';
-import { ShopifyModule } from './../module/';
-import { IShopifyApp } from './../app/';
 import { App } from '@yourwishes/app-base';
+import { ShopifyToken, ShopifyShop, ShopifyModule, IShopifyApp } from './../../';
 
 class DummyAppClass extends App implements IShopifyApp {
   database; server; shopify;

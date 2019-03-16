@@ -21,19 +21,14 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { IShopifyApp } from './../app/';
-import { Module } from '@yourwishes/app-base';
+import { Module, NPMPackage } from '@yourwishes/app-base';
 import { generateInstallUrl, isValidShopName } from '@yourwishes/shopify-utils';
+
+import { IShopifyApp } from './../app/';
 import { shopAuth, getInstallUrl } from './../api/';
-import * as crypto from 'crypto';
-
 import { ShopifyShop, ShopifyToken } from './../shopify';
-import { ShopifyUpdateable } from './../update';
 
-import {
-  createNoncesTable, createTokensTable,
-  getAccessTokens
-} from './../queries/';
+import { createNoncesTable, createTokensTable, getAccessTokens } from './../queries/';
 
 export const CONFIG_KEY = 'shopify.key';
 export const CONFIG_SECRET ='shopify.secret';
@@ -41,6 +36,7 @@ export const CONFIG_HOST = 'shopify.host';
 export const CONFIG_AUTHORIZE = 'shopify.authorize';
 
 export class ShopifyModule extends Module {
+  app:IShopifyApp;
   apiKey:string;
   apiSecret:string;
   host:string;
@@ -55,13 +51,24 @@ export class ShopifyModule extends Module {
 
   constructor(app:IShopifyApp) {
     super(app);
-
-    app.updateChecker.addUpdateable(new ShopifyUpdateable(app));
   }
+
+  getInstallUrl(shop:string, nonce:string, scopes:string[]) {
+    //Same as the one from the util but we are going to pass the config values
+    return generateInstallUrl(shop, this.apiKey, scopes, this.redirectUrl, nonce);
+  }
+
+  getOrCreateShop(shopName:string) {
+    if(!isValidShopName(shopName)) throw new Error("Cannot create a shop for an invalid shop name!");
+    if(this.shops[shopName]) return this.shops[shopName];
+    return this.shops[shopName] = new ShopifyShop(this, shopName);
+  }
+
+  loadPackage():NPMPackage { return require('./../../package.json'); }
 
   async init():Promise<void> {
     //Confirm Modules
-    let app = this.app as IShopifyApp;
+    let { app } = this;
     if(!app.database || !app.database.isConnected()) throw new Error("Database must be connected before Shopify can init.");
     if(!app.server) throw new Error("Server must be setup before Shopify can init.");
 
@@ -94,8 +101,8 @@ export class ShopifyModule extends Module {
     this.shopAuthHandler = new shopAuth(this.authorize);
     this.getInstallUrlHandler = new getInstallUrl();
 
-    app.server.addAPIHandler(this.shopAuthHandler);
-    app.server.addAPIHandler(this.getInstallUrlHandler);
+    app.server.api.addAPIHandler(this.shopAuthHandler);
+    app.server.api.addAPIHandler(this.getInstallUrlHandler);
 
     //Now finally load our stores
     let tokens = await getAccessTokens(app.database);
@@ -116,20 +123,12 @@ export class ShopifyModule extends Module {
     });
   }
 
-  removeShop(shop) { delete this.shops[shop.shopName]; }
+  async destroy():Promise<void> {
 
-  getInstallUrl(shop:string, nonce:string, scopes:string[]) {
-    //Same as the one from the util but we are going to pass the config values
-    return generateInstallUrl(shop, this.apiKey, scopes, this.redirectUrl, nonce);
   }
 
-  getOrCreateShop(shopName:string) {
-    if(!isValidShopName(shopName)) throw new Error("Cannot create a shop for an invalid shop name!");
-    if(this.shops[shopName]) return this.shops[shopName];
-    return this.shops[shopName] = new ShopifyShop(this, shopName);
-  }
 
-  generateNonce():string {
-    return crypto.randomBytes(16).toString('base64');
+  removeShop(shop) {
+    delete this.shops[shop.shopName];
   }
 }

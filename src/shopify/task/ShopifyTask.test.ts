@@ -2,16 +2,15 @@ import { App } from '@yourwishes/app-base';
 import {
   ShopifyTask, ShopifyTaskRequest, PRIORITY_HIGH, PRIORITY_MEDIUM, PRIORITY_LOW,
   IShopifyApp, ShopifyModule, ShopifyShop, ShopifyToken
-} from './../';
+} from './../../';
 
 
 /// Dummies (Yes there's a lot) ///
 class DummyAppClass extends App implements IShopifyApp {
   database; server; shopify;
-
-  constructor() { super(); }
-
   scopes:string[]=[];
+  
+  constructor() { super(); }
   getShopifyScopes(shop: string): string[] { return this.scopes; }
 }
 

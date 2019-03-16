@@ -1,18 +1,12 @@
-import { ShopifyShop, ShopifyToken } from './';
-import { ShopifyModule } from './../module/';
-import { IShopifyApp } from './../app/';
 import { App } from '@yourwishes/app-base';
+import { ShopifyModule, ShopifyShop, ShopifyToken, IShopifyApp } from './../../';
 
 class DummyAppClass extends App implements IShopifyApp {
-  server;
-  database;
+  server; database;
   shopify:ShopifyModule;
   scopes:string[] = [];
 
-  constructor() {
-    super();
-  }
-
+  constructor() { super(); }
   getShopifyScopes() { return this.scopes; }
 };
 

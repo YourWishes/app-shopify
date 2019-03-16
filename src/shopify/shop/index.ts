@@ -21,18 +21,4 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { ModuleUpdateable, NPMPackage } from '@yourwishes/app-base';
-import { IShopifyApp } from './../app/';
-
-export class ShopifyUpdateable extends ModuleUpdateable {
-  app:IShopifyApp;
-
-  constructor(app:IShopifyApp) {
-    super();
-    this.app = app;
-  }
-
-  getPackage():NPMPackage {
-    return require('./../../package.json');
-  }
-}
+export * from './ShopifyShop';

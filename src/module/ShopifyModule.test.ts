@@ -1,9 +1,7 @@
 import { App } from '@yourwishes/app-base';
-import { IShopifyApp } from './../app/';
-import { ShopifyModule } from './ShopifyModule';
-import { ShopifyShop } from './../shopify/';
 import { ServerModule } from '@yourwishes/app-server';
 import { DatabaseConnection } from '@yourwishes/app-database';
+import { IShopifyApp, ShopifyModule, ShopifyShop } from './../';
 
 class DummyApp extends App implements IShopifyApp {
   server:ServerModule;
@@ -99,9 +97,9 @@ describe('init', () => {
     let app = new DummyApp();
     let module = new ShopifyModule(app);
     app.config.data = sampleConfig;
-    expect(app.server.apiHandlers).toHaveLength(0);
+    expect(app.server.api.apiHandlers).toHaveLength(0);
     await module.init();
-    expect(app.server.apiHandlers.length).toBeGreaterThan(0);
+    expect(app.server.api.apiHandlers.length).toBeGreaterThan(0);
   });
 
   it('should load the tokens, and verify them', async () => {
@@ -128,19 +126,6 @@ describe('init', () => {
     });
 
     expect(verified).toHaveBeenCalledTimes(3);
-  });
-});
-
-
-describe('generateNonce', () => {
-  let app = new DummyApp();
-  let module = new ShopifyModule(app);
-
-  it('should generate a random string', () => {
-    expect(module.generateNonce()).not.toStrictEqual(module.generateNonce());
-    expect(module.generateNonce()).not.toStrictEqual(module.generateNonce());
-    expect(module.generateNonce()).not.toStrictEqual(module.generateNonce());
-    expect(module.generateNonce()).not.toStrictEqual(module.generateNonce());
   });
 });
 

@@ -26,6 +26,7 @@ import { RESPONSE_OK, RESPONSE_INTERNAL_ERROR } from '@yourwishes/app-api';
 import { ServerAPIRequest, ServerAPIResponse, ServerAPIHandler } from '@yourwishes/app-server';
 import { isValidShopName } from '@yourwishes/shopify-utils';
 import { IShopifyApp } from './../app/';
+import { generateNonce } from './../util/';
 import { insertNonce, deleteNonceForShop } from './../queries/nonce/';
 
 export class getInstallUrl extends ServerAPIHandler {
@@ -45,7 +46,7 @@ export class getInstallUrl extends ServerAPIHandler {
     let shopfiyShop = app.shopify.getOrCreateShop(shop);
     if(shopfiyShop.tokens.length) return { code: 400, data: 'Shop already validated' };
 
-    let nonce = shopify.generateNonce();
+    let nonce = generateNonce();
     let scopes = app.getShopifyScopes(shop);
     let url = shopify.getInstallUrl(shop, nonce, scopes);
 
