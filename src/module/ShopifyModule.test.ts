@@ -129,6 +129,13 @@ describe('init', () => {
   });
 });
 
+describe('loadPackage', () => {
+  it('should load the package data', () => {
+    let app = new DummyApp();
+    expect(new ShopifyModule(app).package).toHaveProperty("name", "@yourwishes/app-shopify");
+  });
+});
+
 describe('getOrCreateShop', () => {
   let app = new DummyApp();
 
