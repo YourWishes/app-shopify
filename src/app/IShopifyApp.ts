@@ -30,5 +30,5 @@ export interface IShopifyApp extends IServerApp, IDatabaseApp {
   shopify:ShopifyModule;
 
   getShopifyScopes(shop:string):string[];
-  createShop(shopify:ShopifyModule, shopName:string):ShopifyShop;
+  createShopifyShop(shopify:ShopifyModule, shopName:string):ShopifyShop;
 }

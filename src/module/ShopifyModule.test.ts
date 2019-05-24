@@ -15,7 +15,7 @@ class DummyApp extends App implements IShopifyApp {
   }
 
   getShopifyScopes() { return ['read_themes', 'write_themes']; }
-  createShop(module,shopName) {return new ShopifyShop(module, shopName);}
+  createShopifyShop(module,shopName) {return new ShopifyShop(module, shopName);}
 }
 
 

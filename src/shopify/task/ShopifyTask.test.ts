@@ -12,7 +12,7 @@ class DummyAppClass extends App implements IShopifyApp {
 
   constructor() { super(); }
   getShopifyScopes(shop: string): string[] { return this.scopes; }
-  createShop(module,shopName) {return null;}
+  createShopifyShop(module,shopName) {return null;}
 }
 
 const DummyApp = new DummyAppClass();
