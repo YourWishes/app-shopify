@@ -49,7 +49,7 @@ export class shopAuth extends ServerAPIHandler {
     if(!request.hasInteger('timestamp')) return { code: 403, data: 'Missing or Invalid timestamp' };
 
     //Prepare Cryptography
-    let app = request.server.app as IShopifyApp;
+    let app = request.owner.app as IShopifyApp;
     let hmac = request.getString('hmac', 64);
     let state = request.getString('state', 1024);
     let shopName = request.getString('shop', 128);

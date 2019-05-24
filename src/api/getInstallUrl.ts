@@ -37,7 +37,7 @@ export class getInstallUrl extends ServerAPIHandler {
   async onRequest(request:ServerAPIRequest):Promise<ServerAPIResponse> {
     if(!request.hasString('shop', 128)) return { code: 400, data: 'Missing or Invalid shop' };
 
-    let app = request.server.app as IShopifyApp;
+    let app = request.owner.app as IShopifyApp;
     let { shopify } = app;
 
     let shop = request.getString('shop', 128);

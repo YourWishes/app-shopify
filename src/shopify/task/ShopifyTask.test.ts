@@ -9,9 +9,10 @@ import {
 class DummyAppClass extends App implements IShopifyApp {
   database; server; shopify;
   scopes:string[]=[];
-  
+
   constructor() { super(); }
   getShopifyScopes(shop: string): string[] { return this.scopes; }
+  createShop(module,shopName) {return null;}
 }
 
 const DummyApp = new DummyAppClass();

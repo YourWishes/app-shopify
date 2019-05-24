@@ -61,7 +61,7 @@ export class ShopifyModule extends Module {
   getOrCreateShop(shopName:string) {
     if(!isValidShopName(shopName)) throw new Error("Cannot create a shop for an invalid shop name!");
     if(this.shops[shopName]) return this.shops[shopName];
-    return this.shops[shopName] = new ShopifyShop(this, shopName);
+    return this.shops[shopName] = this.app.createShop(this, shopName);
   }
 
   loadPackage():NPMPackage { return require('./../../package.json'); }
