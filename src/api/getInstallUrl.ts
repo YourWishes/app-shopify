@@ -43,8 +43,8 @@ export class getInstallUrl extends ServerAPIHandler {
     let shop = request.getString('shop', 128);
     if(!isValidShopName(shop)) return { code: 400, data: 'Missing or Invalid shop' };
 
-    let shopfiyShop = app.shopify.getOrCreateShop(shop);
-    if(shopfiyShop.tokens.length) return { code: 400, data: 'Shop already validated' };
+    let shopifyShop = app.shopify.shops[shop];
+    if(shopifyShop && shopifyShop.tokens.length) return { code: 400, data: 'Shop already validated' };
 
     let nonce = generateNonce();
     let scopes = app.getShopifyScopes(shop);
