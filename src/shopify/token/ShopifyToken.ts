@@ -111,7 +111,11 @@ export class ShopifyToken {
     }
 
     //For some reason the token doesn't work (unverified)
-    await this.delete();
+    try {
+      await this.delete();
+    } catch(ex) {
+      this.shop.shopify.logger.severe(ex);
+    }
     return false;
   }
 
