@@ -31,15 +31,20 @@ import { insertToken, deleteToken } from './../../queries/';
 export interface IShopifyPublicToken { accessToken:string, scopes?:string[] };
 export interface IShopifyPrivateToken { apiKey:string, password:string, scopes?:string[] };
 
+//How often should we ping Shopify to see how many slots are free.
+export const TOKEN_RESET_COOLDOWN = 750;
+
 export class ShopifyToken {
   token:IShopifyPublicToken|IShopifyPrivateToken;
   shop:ShopifyShop;
   scopes:string[]=[];
 
   processingTasks:ShopifyTaskRequest[]=[];
+  checkScopesTask:NodeJS.Timeout;
 
   api:Shopify;
   limits:ICallLimits;
+
 
   constructor(shop:ShopifyShop, token:IShopifyPublicToken|IShopifyPrivateToken) {
     if(shop == null) throw new Error("Invalid Shop");
@@ -69,16 +74,14 @@ export class ShopifyToken {
 
     if(available <= 0) {
       if(this.processingTasks.length) return 0;//We're fetching something, it should be what triggers an availibility recheck
-      this.fetchAccessScopes().catch(error => {
-        console.error(error);
-      });//Forces us to fetch some access scopes, this will in turn fetch more access scopes
+      this.queueCheckTask();
       return 0;
     }
 
     return available;
   }
 
-  isAvailable() { return this.getAvailableSlots() > 0; }
+  isAvailable() { return this.getAvailableSlots() > 1; }
 
   async fetchAccessScopes() {
     if(this.processingTasks.length) return this.scopes;
@@ -95,6 +98,26 @@ export class ShopifyToken {
 
     //Return scopes cuz why not
     return this.scopes;
+  }
+
+  queueCheckTask(delay:number=TOKEN_RESET_COOLDOWN) {
+    //Puts a small delay on checking the access scopes, this will also cause the
+    //token to update it's call limits, but only once every $delay milliseconds
+    if(this.checkScopesTask) return;
+
+    this.checkScopesTask = setTimeout(async () => {
+      try {
+        await this.fetchAccessScopes();
+      } catch(ex) {
+        //Failed to fetch, this could be because we're still hitting the limits
+        //If this fails because of a 429 we can run the queue check again
+        console.error(ex);
+        //this.shop.shopify.logger.severe(ex);
+      }
+
+      if(this.checkScopesTask) clearTimeout(this.checkScopesTask);
+      this.checkScopesTask = null;
+    }, delay);
   }
 
   async verify():Promise<boolean> {
@@ -123,6 +146,7 @@ export class ShopifyToken {
     let app = this.shop.shopify.app as IShopifyApp;
     this.shop.removeToken(this);
     if(!this.token['accessToken']) return;
+
     let token = this.token as IShopifyPublicToken;
     try {
       await deleteToken(app.database, this.shop.shopName, token.accessToken);
