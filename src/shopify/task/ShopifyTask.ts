@@ -83,7 +83,16 @@ export class ShopifyTaskRequest {
 
   onTaskError(error:any) {
     this.error = error;
-    if(this.reject) this.reject(error);
+
+    //Make a nice Shopify Error
+    let e = error;
+    if(error && error.response && error.response.body && error.response.body.errors) {
+      e = error.response.body.errors;
+      if(e.base) e = e.base;
+      if(Array.isArray(e)) e = e.join('\n');
+    }
+
+    if(this.reject) this.reject(e);
     this.stopTask();
     this.token.onTaskError(this);
   }
