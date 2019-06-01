@@ -41,10 +41,10 @@ export class ShopifyToken {
 
   processingTasks:ShopifyTaskRequest[]=[];
   checkScopesTask:NodeJS.Timeout;
+  lastRequest:Date = new Date();
 
   api:Shopify;
   limits:ICallLimits;
-
 
   constructor(shop:ShopifyShop, token:IShopifyPublicToken|IShopifyPrivateToken) {
     if(shop == null) throw new Error("Invalid Shop");
@@ -81,7 +81,7 @@ export class ShopifyToken {
     return available;
   }
 
-  isAvailable() { return this.getAvailableSlots() > 1; }
+  isAvailable() { return this.getAvailableSlots() > 1 || (new Date().getTime() - this.lastRequest.getTime()) > TOKEN_RESET_COOLDOWN; }
 
   async fetchAccessScopes() {
     if(this.processingTasks.length) return this.scopes;
@@ -164,11 +164,13 @@ export class ShopifyToken {
   }
 
   startTask(task:ShopifyTaskRequest) {
+    this.lastRequest = new Date();//Update the last request
     this.processingTasks.push(task);
     task.start(this);
   }
 
   onLimitsAdjusted(limits:ICallLimits) {
+    this.lastRequest = new Date();
     this.limits = limits;
     this.shop.checkPending();
   }

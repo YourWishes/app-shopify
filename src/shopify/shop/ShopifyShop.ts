@@ -33,6 +33,7 @@ export class ShopifyShop {
 
   queuedTasks:ShopifyTaskRequest[]=[];
   processingTasks:ShopifyTaskRequest[]=[];
+  queueCheck:NodeJS.Timeout;
 
   isChecking:boolean=false;
 
@@ -46,6 +47,10 @@ export class ShopifyShop {
   addToken(token:ShopifyToken) {
     if(token == null) throw new Error("Invalid Token");
     if(this.tokens.indexOf(token) !== -1) return;
+
+    //Start the checking timer (if required)
+    if(!this.queueCheck) this.queueCheck = setInterval(() => this.checkPending(), 1000);
+
     this.tokens.push(token);
   }
 
@@ -54,6 +59,12 @@ export class ShopifyShop {
     let index = this.tokens.indexOf(token);
     if(index === -1) return;
     this.tokens.splice(index, 1);
+
+    //Stop the checking timer
+    if(!this.tokens.length) {
+      clearInterval(this.queueCheck);
+      this.queueCheck = null;
+    }
   }
 
   async verifyTokens() {
