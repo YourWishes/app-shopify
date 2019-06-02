@@ -24,6 +24,7 @@ let dummyDatabase = (app):any => {
     app,
     query: async query => {},
     any: async query => [],
+    manyOrNone: async query => [],
     isConnected: () => true
   }
 };
@@ -114,7 +115,7 @@ describe('init', () => {
       {shop:'sample.myshopify.com',accessToken:'1234567890',id:1}
     ];
 
-    app.database.any = async () => dummyTokens;
+    app.database.manyOrNone = async function<T>():Promise<T[]> { return dummyTokens as any[]; };
     expect(module.shops).toStrictEqual({});
     let verified = jest.fn();
     ShopifyShop.prototype.verifyTokens = async () => verified();

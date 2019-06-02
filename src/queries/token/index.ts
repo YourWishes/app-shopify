@@ -27,7 +27,7 @@ export interface TokenRecord {
   id:string, shop:string, accessToken:string, timestamp:Date
 }
 
-export const createTokensTable = (db:DatabaseConnection):Promise<void> => {
+export const createTokensTable = (db:DatabaseConnection) => {
   return db.query(`CREATE TABLE IF NOT EXISTS "ShopifyTokens" (
     "id" BIGSERIAL NOT NULL PRIMARY KEY,
     "shop" varchar(128) NOT NULL,
@@ -36,8 +36,8 @@ export const createTokensTable = (db:DatabaseConnection):Promise<void> => {
   );`);
 };
 
-export const insertToken = (db:DatabaseConnection, shop:string, accessToken:string, timestamp:Date):Promise<TokenRecord> => {
-  return db.one(
+export const insertToken = (db:DatabaseConnection, shop:string, accessToken:string, timestamp:Date) => {
+  return db.one<TokenRecord>(
     'INSERT INTO "ShopifyTokens" ("shop", "accessToken", "timestamp") VALUES (${shop}, ${accessToken}, ${timestamp}) RETURNING *;',
     { shop, accessToken, timestamp }
   );
@@ -47,6 +47,6 @@ export const deleteToken = (db:DatabaseConnection, shop:string, accessToken:stri
   return db.query('DELETE FROM "ShopifyTokens" WHERE "shop"=${shop} AND "accessToken"=${accessToken};', { shop, accessToken });
 }
 
-export const getAccessTokens = (db:DatabaseConnection):Promise<TokenRecord[]> => {
-  return db.any('SELECT * FROM "ShopifyTokens";');
+export const getAccessTokens = (db:DatabaseConnection) => {
+  return db.manyOrNone<TokenRecord>('SELECT * FROM "ShopifyTokens";');
 };
