@@ -25,9 +25,8 @@ import { Module, NPMPackage } from '@yourwishes/app-base';
 import { generateInstallUrl, isValidShopName } from '@yourwishes/shopify-utils';
 
 import { IShopifyApp } from './../app/';
-import { shopAuth, getInstallUrl } from './../api/';
-import { ShopifyShop, ShopifyToken } from './../shopify';
-
+import { shopAuth, getInstallUrl, WebhookHandler } from './../api/';
+import { ShopifyShop, ShopifyToken, WebhookTypes } from './../shopify';
 import { createNoncesTable, createTokensTable, getAccessTokens } from './../queries/';
 
 export const CONFIG_KEY = 'shopify.key';
@@ -37,17 +36,22 @@ export const CONFIG_AUTHORIZE = 'shopify.authorize';
 
 export class ShopifyModule extends Module {
   app:IShopifyApp;
+
+  //App details
   apiKey:string;
   apiSecret:string;
   host:string;
   authorize:string;
   redirectUrl:string;
 
+  //Stores
+  hasDatabase:boolean = false;
   shops:{[key:string]:ShopifyShop;}={};
 
+  //API Handlers
   shopAuthHandler:shopAuth;
   getInstallUrlHandler:getInstallUrl;
-
+  webhookHandlers:WebhookHandler[];
 
   constructor(app:IShopifyApp) {
     super(app);
@@ -69,8 +73,10 @@ export class ShopifyModule extends Module {
   async init():Promise<void> {
     //Confirm Modules
     let { app } = this;
-    if(!app.database || !app.database.isConnected()) throw new Error("Database must be connected before Shopify can init.");
     if(!app.server) throw new Error("Server must be setup before Shopify can init.");
+
+    this.hasDatabase = app.database && app.database.isConnected();
+    if(!this.hasDatabase) this.logger.warn(`Database is not connected. Shopify tokens cannot be stored!`);
 
     //Confirm Configuration
     if(!app.config.has(CONFIG_KEY)) throw new Error("Missing API Key in Shopify Configuration.");
@@ -94,17 +100,24 @@ export class ShopifyModule extends Module {
     this.redirectUrl = `${this.host}${authorize}`;
 
     //Run our create queries.
-    await createNoncesTable(app.database);
-    await createTokensTable(app.database);
+    if(this.hasDatabase) {
+      await createNoncesTable(app.database);
+      await createTokensTable(app.database);
+    }
 
     //Load API Handlers
     this.shopAuthHandler = new shopAuth(this.authorize);
     this.getInstallUrlHandler = new getInstallUrl();
 
-    app.server.api.addAPIHandler(this.shopAuthHandler);
-    app.server.api.addAPIHandler(this.getInstallUrlHandler);
+    //Setup webhook handlers
+    this.webhookHandlers = WebhookTypes.map(webhook => new WebhookHandler(webhook, `/shopify/${webhook}`));
 
-    //Now finally load our stores
+    //Register API Handlers
+    [
+      this.shopAuthHandler, this.getInstallUrlHandler, ...this.webhookHandlers
+    ].forEach( handler => app.server.api.addAPIHandler(handler) );
+
+    //Loud our stores
     let tokens = await getAccessTokens(app.database);
     tokens.forEach(token => {
       try {
@@ -118,17 +131,15 @@ export class ShopifyModule extends Module {
     });
 
     //Verify all tokens
-    Object.entries(this.shops).forEach(([k,shop]) => {
-      shop.verifyTokens();
-    });
+    let verifyTasks = Object.entries(this.shops).map( ([k,shop]) => shop.verifyTokens() );
+    await Promise.all(verifyTasks);
   }
 
   async destroy():Promise<void> {
 
   }
 
-
-  removeShop(shop) {
+  removeShop(shop:ShopifyShop) {
     delete this.shops[shop.shopName];
   }
 }

@@ -23,29 +23,29 @@
 
 import { ShopifyToken } from './../token/';
 
-export type ShopifyTask = (token:ShopifyToken) => Promise<any>;
+export type ShopifyTask<T> = (token:ShopifyToken) => Promise<T>;
 
 export const PRIORITY_HIGH:number =   3000000;
 export const PRIORITY_MEDIUM:number = 4000000;
 export const PRIORITY_LOW:number =    5000000;
 
-export class ShopifyTaskRequest {
-  task:ShopifyTask;
+export class ShopifyTaskRequest<T> {
+  task:ShopifyTask<T>;
   priority:number;
   queued:Date;
   token:ShopifyToken;
 
-  promise:Promise<any>;
-  result:any;
+  promise:Promise<T>;
+  result:T;
   error:any;
 
   id:number;
 
   interval:NodeJS.Immediate;
-  resolve:(value?:any) => void = null;
+  resolve:(value?:T) => void = null;
   reject:(reason?:any) => void = null;
 
-  constructor(task:ShopifyTask, priority?:number) {
+  constructor(task:ShopifyTask<T>, priority?:number) {
     if(!task) throw new Error("Invalid task supplied.");
     this.task = task;
     this.priority = priority || PRIORITY_MEDIUM;
@@ -74,7 +74,7 @@ export class ShopifyTaskRequest {
     });
   }
 
-  onTaskFinished(result:any) {
+  onTaskFinished(result:T) {
     this.result = result;
     if(this.resolve) this.resolve(result);
     this.stopTask();
@@ -97,14 +97,14 @@ export class ShopifyTaskRequest {
     this.token.onTaskError(this);
   }
 
-  async wait():Promise<any> {
+  async wait() {
     //Did the task finish fast?
     if(this.result) return this.result;
     if(this.error) throw this.error;
 
     //Create an interval
     if(!this.promise) {
-      this.promise = new Promise((resolve,reject) => {
+      this.promise = new Promise<T>((resolve,reject) => {
         this.resolve = resolve;
         this.reject = reject;
       });

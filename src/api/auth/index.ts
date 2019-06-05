@@ -21,7 +21,5 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-export * from './shop/';
-export * from './task/';
-export * from './token/';
-export * from './webhook/';
+export * from './getInstallUrl';
+export * from './shopAuth';

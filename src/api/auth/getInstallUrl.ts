@@ -25,9 +25,9 @@
 import { RESPONSE_OK, RESPONSE_INTERNAL_ERROR } from '@yourwishes/app-api';
 import { ServerAPIRequest, ServerAPIResponse, ServerAPIHandler } from '@yourwishes/app-server';
 import { isValidShopName } from '@yourwishes/shopify-utils';
-import { IShopifyApp } from './../app/';
-import { generateNonce } from './../util/';
-import { insertNonce, deleteNonceForShop } from './../queries/nonce/';
+import { IShopifyApp } from './../../app/';
+import { generateNonce } from './../../util/';
+import { insertNonce, deleteNonceForShop } from './../../queries/nonce/';
 
 export class getInstallUrl extends ServerAPIHandler {
   constructor() {

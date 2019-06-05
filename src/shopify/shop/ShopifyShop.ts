@@ -25,14 +25,16 @@ import { isValidShopName } from '@yourwishes/shopify-utils';
 import { ShopifyToken } from './../token/ShopifyToken';
 import { ShopifyTask, ShopifyTaskRequest } from './../task/ShopifyTask';
 import { ShopifyModule } from './../../module/';
+import { WebhookManager } from './../webhook/';
 
 export class ShopifyShop {
   shopName:string;
   shopify:ShopifyModule;
   tokens:ShopifyToken[]=[];
+  webhooks:WebhookManager;
 
-  queuedTasks:ShopifyTaskRequest[]=[];
-  processingTasks:ShopifyTaskRequest[]=[];
+  queuedTasks:ShopifyTaskRequest<any>[]=[];
+  processingTasks:ShopifyTaskRequest<any>[]=[];
   queueCheck:NodeJS.Timeout;
 
   isChecking:boolean=false;
@@ -40,10 +42,13 @@ export class ShopifyShop {
   constructor(shopify:ShopifyModule, shopName:string) {
     if(shopify == null) throw new Error("Invalid Shopify Module");
     if(!isValidShopName(shopName)) throw new Error("Invalid Shop Name.");
+
     this.shopify = shopify;
     this.shopName = shopName;
+    this.webhooks = new WebhookManager(this);
   }
 
+  //============= Tokens =============//
   addToken(token:ShopifyToken) {
     if(token == null) throw new Error("Invalid Token");
     if(this.tokens.indexOf(token) !== -1) return;
@@ -74,6 +79,7 @@ export class ShopifyShop {
     if(this.tokens.length === 0) this.shopify.removeShop(this);
   }
 
+  //============= Tasks =============//
   checkPending() {
     if(this.isChecking) return false;
     this.isChecking = true;
@@ -107,28 +113,30 @@ export class ShopifyShop {
     this.isChecking = false;
   }
 
-  queue(task:ShopifyTask, priority?:number) {
-    let request = new ShopifyTaskRequest(task, priority);
+  queue<T>(task:ShopifyTask<T>, priority?:number) {
+    let request = new ShopifyTaskRequest<T>(task, priority);
     this.queuedTasks.push(request);
     this.checkPending();
     return request;
   }
 
-  async call(task:ShopifyTask, priority?:number) {
+  async call<T>(task:ShopifyTask<T>, priority?:number) {
     //Essentially a "queue, wait, and then return my result"
-    let request = this.queue(task, priority);
+    let request = this.queue<T>(task, priority);
     return await request.wait();
   }
 
-  onTaskComplete(task:ShopifyTaskRequest) {
+  onTaskComplete(task:ShopifyTaskRequest<any>) {
     let index = this.processingTasks.indexOf(task);
     if(index !== -1) this.processingTasks.splice(index, 1);
     this.checkPending();
   }
 
-  onTaskError(task:ShopifyTaskRequest) {
+  onTaskError(task:ShopifyTaskRequest<any>) {
     let index = this.processingTasks.indexOf(task);
     if(index !== -1) this.processingTasks.splice(index, 1);
     this.checkPending();
   }
+
+  //============= Webhooks =============//
 }

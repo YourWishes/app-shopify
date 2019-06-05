@@ -460,10 +460,10 @@
     "@yourwishes/app-base" "^2.1.1"
     pg-promise "^8.7.2"
 
-"@yourwishes/app-server@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@yourwishes/app-server/-/app-server-2.1.0.tgz#078a5b70e7920a9bda5d954a7629ef917ae42f57"
-  integrity sha512-6eMquPaF/XbTyt5MqV4XamwlOX1+DF0Q3so+0QqIEYIbXX/JlKiDUvbTIKnPDn3nkXSLbJv9d5bwtkJuR/bK8g==
+"@yourwishes/app-server@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@yourwishes/app-server/-/app-server-2.1.1.tgz#fe6946dec4c6c291558c6de3ff90232ee86a59e7"
+  integrity sha512-jeuFaT4hVav89ALoAc2FM5Fy5Ilmhfs3GEypmsqGy7GeyStOEpKxSk0KMuUlOmY/I3P5wBku1J5tXMrQ5dkjig==
   dependencies:
     "@types/body-parser" "^1.17.0"
     "@types/express" "^4.16.0"
@@ -4289,6 +4289,11 @@ util.promisify@^1.0.0:
   dependencies:
     define-properties "^1.1.2"
     object.getownpropertydescriptors "^2.0.3"
+
+utility-types@^3.7.0:
+  version "3.7.0"
+  resolved "https://registry.yarnpkg.com/utility-types/-/utility-types-3.7.0.tgz#51f1c29fa35d4267488345706efcf3f68f2b1933"
+  integrity sha512-mqRJXN7dEArK/NZNJUubjr9kbFFVZcmF/JHDc9jt5O/aYXUVmopHYujDMhLmLil1Bxo2+khe6KAIVvDH9Yc4VA==
 
 utils-merge@1.0.1:
   version "1.0.1"

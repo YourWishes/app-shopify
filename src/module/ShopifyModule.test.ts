@@ -36,12 +36,15 @@ let sampleConfig = {
 }
 
 describe('init', () => {
+
+  /* 2019/06/04 - Removing Database as a Hard Requirement
   it('should require the database to be connected first', async () => {
     let app = new DummyApp();
     let module = new ShopifyModule(app);
     app.database = null;
     await expect(module.init()).rejects.toThrow();
   });
+  */
 
   it('should require the server to be setup', async () => {
     let app = new DummyApp();

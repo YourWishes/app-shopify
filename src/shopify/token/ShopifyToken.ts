@@ -39,7 +39,7 @@ export class ShopifyToken {
   shop:ShopifyShop;
   scopes:string[]=[];
 
-  processingTasks:ShopifyTaskRequest[]=[];
+  processingTasks:ShopifyTaskRequest<any>[]=[];
   checkScopesTask:NodeJS.Timeout;
   lastRequest:Date = new Date();
 
@@ -143,6 +143,8 @@ export class ShopifyToken {
   }
 
   async delete() {
+    if(!this.shop.shopify.hasDatabase) return;
+
     let app = this.shop.shopify.app as IShopifyApp;
     this.shop.removeToken(this);
     if(!this.token['accessToken']) return;
@@ -157,13 +159,15 @@ export class ShopifyToken {
   }
 
   async save() {
+    if(!this.shop.shopify.hasDatabase) return;
+    
     let app = this.shop.shopify.app as IShopifyApp;
     let token = this.token as IShopifyPublicToken;
     if(!token.accessToken) return;
     await insertToken(app.database, this.shop.shopName, token.accessToken, new Date());
   }
 
-  startTask(task:ShopifyTaskRequest) {
+  startTask(task:ShopifyTaskRequest<any>) {
     this.lastRequest = new Date();//Update the last request
     this.processingTasks.push(task);
     task.start(this);
@@ -175,13 +179,13 @@ export class ShopifyToken {
     this.shop.checkPending();
   }
 
-  onTaskComplete(task:ShopifyTaskRequest) {
+  onTaskComplete(task:ShopifyTaskRequest<any>) {
     let index = this.processingTasks.indexOf(task);
     if(index !== -1) this.processingTasks.splice(index, 1);
     this.shop.onTaskComplete(task);
   }
 
-  onTaskError(task:ShopifyTaskRequest) {
+  onTaskError(task:ShopifyTaskRequest<any>) {
     let index = this.processingTasks.indexOf(task);
     if(index !== -1) this.processingTasks.splice(index, 1);
     this.shop.onTaskError(task);

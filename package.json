@@ -1,6 +1,6 @@
 {
   "name": "@yourwishes/app-shopify",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Shopify Module for Shopify Apps using the App Framework",
   "main": "dist/index.js",
   "scripts": {
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YourWishes/app-server.git"
+    "url": "git+https://github.com/YourWishes/app-shopify.git"
   },
   "keywords": [
     "server",
@@ -34,9 +34,10 @@
   "dependencies": {
     "@yourwishes/app-base": "^2.1.1",
     "@yourwishes/app-database": "^2.1.1",
-    "@yourwishes/app-server": "^2.1.0",
+    "@yourwishes/app-server": "^2.1.1",
     "@yourwishes/shopify-utils": "^1.0.5",
     "cross-fetch": "^3.0.3",
-    "shopify-api-node": "^2.19.3"
+    "shopify-api-node": "^2.19.3",
+    "utility-types": "^3.7.0"
   }
 }

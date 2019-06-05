@@ -148,6 +148,7 @@ describe('save', () => {
     let shop = new ShopifyShop(module, 'test.myshopify.com');
     let fn = jest.fn();
     app.database = { one: async () => fn() };
+    module.hasDatabase = true;
 
     let tokenPrivate = new ShopifyToken(shop,SamplePrivate);
     await expect(tokenPrivate.save()).resolves.not.toThrow();
