@@ -23,7 +23,7 @@
 
 import { RESPONSE_OK, RESPONSE_UNAUTHORIZED } from '@yourwishes/app-api';
 import { ServerAPIRequest, ServerAPIResponse, ServerAPIHandler } from '@yourwishes/app-server';
-import { IShopifyApp } from './../../app/';
+import { IShopifyApp } from '~app';
 import { WebhookTopic } from 'shopify-api-node';
 import * as crypto from 'crypto';
 

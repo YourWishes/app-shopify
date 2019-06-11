@@ -24,10 +24,10 @@
 import { Module, NPMPackage } from '@yourwishes/app-base';
 import { generateInstallUrl, isValidShopName } from '@yourwishes/shopify-utils';
 
-import { IShopifyApp } from './../app/';
-import { shopAuth, getInstallUrl, WebhookHandler } from './../api/';
-import { ShopifyShop, ShopifyToken, WebhookTypes } from './../shopify';
-import { createNoncesTable, createTokensTable, getAccessTokens } from './../queries/';
+import { IShopifyApp } from '~app';
+import { shopAuth, getInstallUrl, WebhookHandler } from '~api';
+import { ShopifyShop, ShopifyToken, WebhookTypes } from '~shopify';
+import { createNoncesTable, createTokensTable, getAccessTokens } from '~queries';
 
 export const CONFIG_KEY = 'shopify.key';
 export const CONFIG_SECRET ='shopify.secret';

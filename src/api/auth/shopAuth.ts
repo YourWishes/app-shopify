@@ -25,10 +25,10 @@ import { RESPONSE_OK, RESPONSE_INTERNAL_ERROR } from '@yourwishes/app-api';
 import { ServerAPIRequest, ServerAPIResponse, ServerAPIHandler } from '@yourwishes/app-server';
 import { encodeObject, isValidShopName, generateShopUrl } from '@yourwishes/shopify-utils';
 import * as crypto from 'crypto';
-import { IShopifyApp } from './../../app/';
-import { getNonceForShop, deleteNonceForShop } from './../../queries/nonce';
+import { IShopifyApp } from '~app/';
+import { getNonceForShop, deleteNonceForShop } from '~queries/nonce';
 import { fetch } from 'cross-fetch';
-import { ShopifyToken } from './../../shopify/';
+import { ShopifyToken } from '~shopify/';
 
 export const NONCE_TIMEOUT_MS = 10*60*1000;
 

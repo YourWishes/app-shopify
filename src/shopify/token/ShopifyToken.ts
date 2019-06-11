@@ -25,8 +25,8 @@ import * as Shopify from 'shopify-api-node';
 import { ICallLimits, IAccessScope } from 'shopify-api-node';
 import { ShopifyShop } from './../shop/';
 import { ShopifyTaskRequest } from './../task/';
-import { IShopifyApp } from './../../app/';
-import { insertToken, deleteToken } from './../../queries/';
+import { IShopifyApp } from '~app';
+import { insertToken, deleteToken } from '~queries';
 
 export interface IShopifyPublicToken { accessToken:string, scopes?:string[] };
 export interface IShopifyPrivateToken { apiKey:string, password:string, scopes?:string[] };
@@ -160,7 +160,7 @@ export class ShopifyToken {
 
   async save() {
     if(!this.shop.shopify.hasDatabase) return;
-    
+
     let app = this.shop.shopify.app as IShopifyApp;
     let token = this.token as IShopifyPublicToken;
     if(!token.accessToken) return;

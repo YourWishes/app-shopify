@@ -22,9 +22,9 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import { isValidShopName } from '@yourwishes/shopify-utils';
-import { ShopifyToken } from './../token/ShopifyToken';
-import { ShopifyTask, ShopifyTaskRequest } from './../task/ShopifyTask';
-import { ShopifyModule } from './../../module/';
+import { ShopifyToken } from './../token/';
+import { ShopifyTask, ShopifyTaskRequest, PRIORITY_HIGH } from './../task/';
+import { ShopifyModule } from '~module';
 import { WebhookManager } from './../webhook/';
 
 export class ShopifyShop {
@@ -111,6 +111,15 @@ export class ShopifyShop {
     });
 
     this.isChecking = false;
+  }
+
+  retry(task:ShopifyTaskRequest<any>) {
+    let index = this.processingTasks.indexOf(task);
+    if(index === -1) throw new Error(`Cannot requeue a task unless it's still pending!`);
+    this.processingTasks.splice(index, 1);
+    task.priority = PRIORITY_HIGH;
+    this.queuedTasks.push(task);
+    this.checkPending();
   }
 
   queue<T>(task:ShopifyTask<T>, priority?:number) {

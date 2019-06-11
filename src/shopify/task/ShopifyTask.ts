@@ -45,6 +45,9 @@ export class ShopifyTaskRequest<T> {
   resolve:(value?:T) => void = null;
   reject:(reason?:any) => void = null;
 
+  maxRetries:number=3;
+  try:number=0;
+
   constructor(task:ShopifyTask<T>, priority?:number) {
     if(!task) throw new Error("Invalid task supplied.");
     this.task = task;
@@ -58,6 +61,7 @@ export class ShopifyTaskRequest<T> {
     //Track our token
     this.token = token;
     this.id = Math.round(Math.random()*1000000);
+    this.try++;
 
     //Now do my process
     let promise = this.task(token);
@@ -74,6 +78,11 @@ export class ShopifyTaskRequest<T> {
     });
   }
 
+  shouldErrorRestart(e) {
+    let ej = JSON.stringify(e);
+    return ej.includes('calls per second');
+  }
+
   onTaskFinished(result:T) {
     this.result = result;
     if(this.resolve) this.resolve(result);
@@ -88,6 +97,17 @@ export class ShopifyTaskRequest<T> {
     let e = error;
     if(error && error.response && error.response.body && error.response.body.errors) {
       e = error.response.body.errors;
+
+      //Check the type of error, under certain conditions we're going to restart
+      //the task.
+      if(this.shouldErrorRestart(e)) {
+        //How many tries are we on?
+        if(this.maxRetries && this.try >= this.maxRetries) {
+          this.token.shop.shopify.logger.severe(`Max retries was reached for task #${this.id}!`);
+        }
+        return this.token.shop.retry(this);
+      }
+
       if(e.base) e = e.base;
       if(Array.isArray(e)) e = e.join('\n');
     }

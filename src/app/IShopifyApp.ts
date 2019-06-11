@@ -23,8 +23,8 @@
 
 import { IServerApp } from '@yourwishes/app-server';
 import { IDatabaseApp } from '@yourwishes/app-database';
-import { ShopifyModule } from './../module/';
-import { ShopifyShop } from './../shopify/';
+import { ShopifyModule } from '~module';
+import { ShopifyShop } from '~shopify';
 
 export interface IShopifyApp extends IServerApp, IDatabaseApp {
   shopify:ShopifyModule;
