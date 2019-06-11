@@ -79,8 +79,8 @@ export class ShopifyTaskRequest<T> {
   }
 
   shouldErrorRestart(e) {
-    let ej = JSON.stringify(e);
-    return ej.includes('calls per second');
+    let ej = JSON.stringify(e).toLowerCase();
+    return ej.includes('calls per second') || ej.includes('too many requests');
   }
 
   onTaskFinished(result:T) {

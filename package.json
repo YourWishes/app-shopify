@@ -1,11 +1,11 @@
 {
   "name": "@yourwishes/app-shopify",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Shopify Module for Shopify Apps using the App Framework",
   "main": "dist/index.js",
   "scripts": {
     "test": "jest",
-    "build": "tsc -p ."
+    "build": "ttsc -p ."
   },
   "repository": {
     "type": "git",
