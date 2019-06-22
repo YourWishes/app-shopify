@@ -21,17 +21,13 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { RESPONSE_OK, RESPONSE_UNAUTHORIZED } from '@yourwishes/app-api';
+import { RESPONSE_OK, RESPONSE_BAD_REQUEST } from '@yourwishes/app-api';
 import { ServerAPIRequest, ServerAPIResponse, ServerAPIHandler } from '@yourwishes/app-server';
-import { IShopifyApp } from '~app';
 import { WebhookTopic } from 'shopify-api-node';
-import * as crypto from 'crypto';
+import { verifyShopifyRequest } from './../shared/';
 
 export const HEADER_TOPIC = 'X-Shopify-Topic';
-export const HEADER_HMAC = 'X-Shopify-Hmac-Sha256';
-export const HEADER_DOMAIN = 'X-Shopify-Shop-Domain';
-
-export const RESPONSE_HMAC_BAD = { code: RESPONSE_UNAUTHORIZED, data: 'Failed to verify request.' }
+export const RESPONSE_TOPIC_BAD = { code: RESPONSE_BAD_REQUEST, data: 'Invalid topic' };
 
 export class WebhookHandler extends ServerAPIHandler {
   topic:WebhookTopic;
@@ -47,32 +43,14 @@ export class WebhookHandler extends ServerAPIHandler {
   getWebhookURL() { return `/shopify/${this.methodName}`; }
 
   async onRequest(request:ServerAPIRequest):Promise<ServerAPIResponse> {
-    //Verify request
-    if(!request.hasHeader(HEADER_TOPIC)) return RESPONSE_HMAC_BAD;
-    if(!request.hasHeader(HEADER_HMAC)) return RESPONSE_HMAC_BAD;
-    if(!request.hasHeader(HEADER_DOMAIN)) return RESPONSE_HMAC_BAD;
-
-    //Get app hmac
-    let app = request.owner.app as IShopifyApp;
-    let crpt = crypto.createHmac('sha256', app.shopify.apiSecret);
-
-    //Fetch data and passed hmac
-    //@ts-ignore
-    let data = request.req.rawBody
-    let hmac = request.getHeader(HEADER_HMAC);
-
-    //Digest and compare
-    let calculatedHmac = crpt.update(data).digest('base64');
-    if(calculatedHmac !== hmac) return RESPONSE_HMAC_BAD;
-
-    //HMAC validated, validate store
-    let shopName = request.getHeader(HEADER_DOMAIN);
-    let shop = app.shopify.shops[shopName];
-    if(!shop) return RESPONSE_HMAC_BAD;
+    //Verify the HMAC...
+    let shop;
+    try { shop = verifyShopifyRequest(request); } catch(e) { return e; }
 
     //Validate topic
+    if(!request.hasHeader(HEADER_TOPIC)) return RESPONSE_TOPIC_BAD;
     let topic = request.getHeader(HEADER_TOPIC);
-    if(!topic || topic !== this.topic) return RESPONSE_HMAC_BAD;
+    if(!topic || topic !== this.topic) return RESPONSE_TOPIC_BAD;
 
     //Trigger listeners, async to stop blocking response to Shopify
     let listeners = (shop.webhooks.listeners[topic] || []);

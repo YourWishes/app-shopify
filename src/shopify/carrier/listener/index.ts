@@ -21,7 +21,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-export * from './auth/';
-export * from './carrier/';
-export * from './shared/';
-export * from './webhook/';
+import { ICarrierRequest, ICarrierResponse } from '~api/carrier/';
+import { ShopifyShop } from '~shopify/shop';
+
+export type CarrierListener = (shop:ShopifyShop, data:ICarrierRequest) => Promise<ICarrierResponse|ICarrierResponse[]>;

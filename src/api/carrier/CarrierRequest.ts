@@ -21,7 +21,59 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-export * from './auth/';
-export * from './carrier/';
-export * from './shared/';
-export * from './webhook/';
+import * as Shopify from 'shopify-api-node';
+
+export interface ICarrierAddress {
+  country:string,
+  postal_code:string,
+  province?:string,
+  city:string,
+  name?:string
+  address1?:string
+  address2?:string
+  address3?:string,
+  phone?:string,
+  fax?:string,
+  email?:string,
+  address_type?:string,
+  company_name?:string
+}
+
+export interface ICarrierItem {
+  name?:string,
+  sku?:string,
+  quantity:number,
+  grams?:number,
+  price:number,
+  vendor?:string,
+  requires_shipping:boolean,
+  taxable:boolean,
+  fulfillment_service?:string,
+  properties?:Shopify.ILineItemProperty,
+  product_id:number,
+  variant_id:number
+}
+
+export interface ICarrierRequestBody {
+  origin:ICarrierAddress,
+  destination:ICarrierAddress,
+  items:ICarrierItem[],
+  currency:string,
+  locale:string
+}
+
+export interface ICarrierRequest {
+  rate:ICarrierRequestBody
+}
+
+//Response
+export interface ICarrierResponse {
+  service_name:string;
+  description?:string;
+  service_code:string;
+  currency:string;
+  total_price:number;
+  phone_required?:boolean;
+  min_delivery_date?:Date
+  max_delivery_date?:Date
+};

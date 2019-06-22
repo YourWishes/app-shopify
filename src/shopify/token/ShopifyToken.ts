@@ -131,6 +131,7 @@ export class ShopifyToken {
     } catch(e) {
       this.shop.shopify.logger.warn(`Shop ${this.shop.shopName} failed to verify!`);
       this.shop.shopify.logger.warn(e);
+      if(e.type == 'system') return false;
     }
 
     //For some reason the token doesn't work (unverified)
@@ -144,6 +145,8 @@ export class ShopifyToken {
 
   async delete() {
     if(!this.shop.shopify.hasDatabase) return;
+
+    this.shop.shopify.logger.warn(`Deleting token for shop ${this.shop.shopName}!`);
 
     let app = this.shop.shopify.app as IShopifyApp;
     this.shop.removeToken(this);

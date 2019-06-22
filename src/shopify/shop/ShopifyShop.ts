@@ -26,12 +26,14 @@ import { ShopifyToken } from './../token/';
 import { ShopifyTask, ShopifyTaskRequest, PRIORITY_HIGH } from './../task/';
 import { ShopifyModule } from '~module';
 import { WebhookManager } from './../webhook/';
+import { CarrierManager } from './../carrier/';
 
 export class ShopifyShop {
   shopName:string;
   shopify:ShopifyModule;
   tokens:ShopifyToken[]=[];
   webhooks:WebhookManager;
+  carriers:CarrierManager;
 
   queuedTasks:ShopifyTaskRequest<any>[]=[];
   processingTasks:ShopifyTaskRequest<any>[]=[];
@@ -46,6 +48,7 @@ export class ShopifyShop {
     this.shopify = shopify;
     this.shopName = shopName;
     this.webhooks = new WebhookManager(this);
+    this.carriers = new CarrierManager(this);
   }
 
   //============= Tokens =============//
@@ -92,6 +95,8 @@ export class ShopifyShop {
 
     let availableTokens = this.tokens.filter(token => token.isAvailable());
     if(!availableTokens.length) return this.isChecking = false;
+
+
 
     availableTokens.forEach(token => {
       if(!tasks.length || !this.queuedTasks.length) return;

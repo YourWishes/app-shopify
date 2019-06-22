@@ -21,7 +21,5 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-export * from './auth/';
-export * from './carrier/';
-export * from './shared/';
-export * from './webhook/';
+export * from './manager/CarrierManager';
+export * from './listener/';
