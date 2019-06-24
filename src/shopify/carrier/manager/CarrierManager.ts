@@ -60,10 +60,12 @@ export class CarrierManager {
 
     //First, confirm we have an API handler setup for this name (e.g. another
     //shop may have setup the handler for this name already)
-    let { api } = this.shop.shopify.app.server;
-    if(!api.apiHandlers.some(handler => handler.hasPath(handlerPath))) {
-      //No handler setup for this path, we need to register one
-      api.addAPIHandler(new CarrierHandler(name));
+    if(this.shop.shopify.app.server) {
+      let { api } = this.shop.shopify.app.server;
+      if(!api.apiHandlers.some(handler => handler.hasPath(handlerPath))) {
+        //No handler setup for this path, we need to register one
+        api.addAPIHandler(new CarrierHandler(name));
+      }
     }
 
     //Now check what's in shopify, this requires first confirming what Shopify

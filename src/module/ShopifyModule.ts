@@ -51,7 +51,7 @@ export class ShopifyModule extends Module {
   //API Handlers
   shopAuthHandler:shopAuth;
   getInstallUrlHandler:getInstallUrl;
-  webhookHandlers:WebhookHandler[];
+  webhookHandlers:WebhookHandler[]=[];
 
   constructor(app:IShopifyApp) {
     super(app);
@@ -73,66 +73,74 @@ export class ShopifyModule extends Module {
   async init():Promise<void> {
     //Confirm Modules
     let { app } = this;
-    if(!app.server) throw new Error("Server must be setup before Shopify can init.");
 
     this.hasDatabase = app.database && app.database.isConnected();
     if(!this.hasDatabase) this.logger.warn(`Database is not connected. Shopify tokens cannot be stored!`);
 
     //Confirm Configuration
-    if(!app.config.has(CONFIG_KEY)) throw new Error("Missing API Key in Shopify Configuration.");
-    if(!app.config.has(CONFIG_SECRET)) throw new Error("Missing API Secret in Shopify Configuration.");
-    if(!app.config.has(CONFIG_HOST)) throw new Error("Missing Host in Shopify Configuration.");
+    if(
+      app.config.has(CONFIG_KEY) &&
+      app.config.has(CONFIG_SECRET) &&
+      app.config.has(CONFIG_HOST)
+    ) {
+      //Set Configuration
+      this.apiKey = app.config.get(CONFIG_KEY);
+      this.apiSecret = app.config.get(CONFIG_SECRET);
 
-    //Set Configuration
-    this.apiKey = app.config.get(CONFIG_KEY);
-    this.apiSecret = app.config.get(CONFIG_SECRET);
+      let host = app.config.get(CONFIG_HOST);
+      if(!host.startsWith('http')) host = `https://${host}`;
+      this.host = host;
 
-    let host = app.config.get(CONFIG_HOST);
-    if(!host.startsWith('http')) host = `https://${host}`;
-    this.host = host;
-
-    let authorize = '/shopify/authorize';
-    if(app.config.has(CONFIG_AUTHORIZE)) {
-      authorize = app.config.get(CONFIG_AUTHORIZE);
-      if(!authorize.startsWith('/')) authorize = `/${authorize}`;
+      let authorize = '/shopify/authorize';
+      if(app.config.has(CONFIG_AUTHORIZE)) {
+        authorize = app.config.get(CONFIG_AUTHORIZE);
+        if(!authorize.startsWith('/')) authorize = `/${authorize}`;
+      }
+      this.authorize = authorize;
+      this.redirectUrl = `${this.host}${authorize}`;
+    } else {
+      this.logger.warn(`Shopify Configuration isn't complete, only private tokens can be used!`);
     }
-    this.authorize = authorize;
-    this.redirectUrl = `${this.host}${authorize}`;
 
     //Run our create queries.
     if(this.hasDatabase) {
       await createNoncesTable(app.database);
       await createTokensTable(app.database);
+
+      //Loud our stores
+      let tokens = await getAccessTokens(app.database);
+      tokens.forEach(token => {
+        try {
+          let shop = this.getOrCreateShop(token.shop);
+          let t = new ShopifyToken(shop, token);
+          shop.addToken(t);
+        } catch(e) {
+          this.logger.error(`Failed to load token!`);
+          this.logger.error(e);
+        }
+      });
+
+      //Verify all tokens
+      let verifyTasks = Object.entries(this.shops).map( ([k,shop]) => shop.verifyTokens() );
+      await Promise.all(verifyTasks);
     }
 
     //Load API Handlers
-    this.shopAuthHandler = new shopAuth(this.authorize);
-    this.getInstallUrlHandler = new getInstallUrl();
+    if(app.server) {
+      this.shopAuthHandler = new shopAuth(this.authorize);
+      this.getInstallUrlHandler = new getInstallUrl();
 
-    //Setup webhook handlers
-    this.webhookHandlers = WebhookTypes.map(webhook => new WebhookHandler(webhook, `/shopify/${webhook}`));
+      //Setup webhook handlers
+      this.webhookHandlers = WebhookTypes.map(webhook => new WebhookHandler(webhook, `/shopify/${webhook}`));
 
-    //Register API Handlers
-    [
-      this.shopAuthHandler, this.getInstallUrlHandler, ...this.webhookHandlers
-    ].forEach( handler => app.server.api.addAPIHandler(handler) );
+      //Register API Handlers
+      [
+        this.shopAuthHandler, this.getInstallUrlHandler, ...this.webhookHandlers
+      ].forEach( handler => app.server.api.addAPIHandler(handler) );
 
-    //Loud our stores
-    let tokens = await getAccessTokens(app.database);
-    tokens.forEach(token => {
-      try {
-        let shop = this.getOrCreateShop(token.shop);
-        let t = new ShopifyToken(shop, token);
-        shop.addToken(t);
-      } catch(e) {
-        this.logger.error(`Failed to load token!`);
-        this.logger.error(e);
-      }
-    });
-
-    //Verify all tokens
-    let verifyTasks = Object.entries(this.shops).map( ([k,shop]) => shop.verifyTokens() );
-    await Promise.all(verifyTasks);
+    } else {
+      this.logger.warn(`Server Module not available, endpoits will not function.`);
+    }
   }
 
   async destroy():Promise<void> {

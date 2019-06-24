@@ -40,6 +40,7 @@ export class ShopifyShop {
   queueCheck:NodeJS.Timeout;
 
   isChecking:boolean=false;
+  isInitialized:boolean=false;
 
   constructor(shopify:ShopifyModule, shopName:string) {
     if(shopify == null) throw new Error("Invalid Shopify Module");
@@ -78,8 +79,13 @@ export class ShopifyShop {
   async verifyTokens() {
     //This will verify each token in the shop.
     let tokens = [...this.tokens];//Duplicate for modified arrays.
-    let promises = tokens.map(token => token.verify());
-    if(this.tokens.length === 0) this.shopify.removeShop(this);
+    let promises = await tokens.map(token => token.verify());
+    if(this.tokens.length === 0) {
+      this.shopify.removeShop(this);
+    } else if(!this.isInitialized) {
+      this.isInitialized = true;
+      this.onInitialize();
+    }
   }
 
   //============= Tasks =============//
@@ -140,6 +146,11 @@ export class ShopifyShop {
     return await request.wait();
   }
 
+  //============= Events =============//
+  onInitialize() {
+
+  }
+
   onTaskComplete(task:ShopifyTaskRequest<any>) {
     let index = this.processingTasks.indexOf(task);
     if(index !== -1) this.processingTasks.splice(index, 1);
@@ -151,6 +162,4 @@ export class ShopifyShop {
     if(index !== -1) this.processingTasks.splice(index, 1);
     this.checkPending();
   }
-
-  //============= Webhooks =============//
 }
