@@ -131,7 +131,9 @@ export class ShopifyToken {
     } catch(e) {
       this.shop.shopify.logger.warn(`Shop ${this.shop.shopName} failed to verify!`);
       this.shop.shopify.logger.warn(e);
-      if(e.type == 'system') return false;
+      if([
+        'ENOTFOUND', 'ECONNRESET'
+      ].some(c => e.code)) return false;
     }
 
     //For some reason the token doesn't work (unverified)
