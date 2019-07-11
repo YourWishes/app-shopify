@@ -49,7 +49,7 @@ export interface ICarrierItem {
   requires_shipping:boolean,
   taxable:boolean,
   fulfillment_service?:string,
-  properties?:Shopify.ILineItemProperty,
+  properties?:Shopify.ILineItemProperty[],
   product_id:number,
   variant_id:number
 }

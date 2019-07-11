@@ -30,12 +30,13 @@ import { insertToken, deleteToken } from '~queries';
 
 export interface IShopifyPublicToken { accessToken:string, scopes?:string[] };
 export interface IShopifyPrivateToken { apiKey:string, password:string, scopes?:string[] };
+export type IShopifyToken = IShopifyPublicToken | IShopifyPrivateToken;
 
 //How often should we ping Shopify to see how many slots are free.
 export const TOKEN_RESET_COOLDOWN = 750;
 
 export class ShopifyToken {
-  token:IShopifyPublicToken|IShopifyPrivateToken;
+  token:IShopifyToken;
   shop:ShopifyShop;
   scopes:string[]=[];
 
@@ -46,7 +47,7 @@ export class ShopifyToken {
   api:Shopify;
   limits:ICallLimits;
 
-  constructor(shop:ShopifyShop, token:IShopifyPublicToken|IShopifyPrivateToken) {
+  constructor(shop:ShopifyShop, token:IShopifyToken) {
     if(shop == null) throw new Error("Invalid Shop");
     if(token == null) throw new Error("Invalid Token");
 

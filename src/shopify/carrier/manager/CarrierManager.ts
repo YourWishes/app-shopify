@@ -38,16 +38,22 @@ export class CarrierManager {
     //Name required...
     if(!name) throw new Error(`Missing Name`);
 
+    //Originally I was comparing the callback url, but the problem I was
+    //having is that Shopify only reveals the callback url to the api key that
+    //registered it. So if a Shop has multiple API Keys for the same store they
+    //will end up returning different results depending on which one created the
+    //carrier. For this reason we are using callPrimary rather than call
+
     //Get path
     let handlerPath = getCarrierCallbackUrl(name);
 
     //Get carriers
-    let carriers = await this.shop.call(token => token.api.carrierService.list());
+    let carriers = await this.shop.callPrimary(token => token.api.carrierService.list());
     let carrier = carriers.find(c => c.callback_url.startsWith(this.shop.shopify.host));
 
     //Verify the URL, if the url doesn't match we may need to do a remove
     if(carrier && !carrier.callback_url.endsWith(handlerPath)) {
-      await this.shop.call(token => token.api.carrierService.delete(carrier['id'] as any));
+      await this.shop.callPrimary(token => token.api.carrierService.delete(carrier['id'] as any));
       carrier = null;
     }
 

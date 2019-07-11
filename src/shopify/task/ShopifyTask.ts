@@ -21,7 +21,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { ShopifyToken } from './../token/';
+import { ShopifyToken, IShopifyToken } from './../token/';
 
 export type ShopifyTask<T> = (token:ShopifyToken) => Promise<T>;
 
@@ -31,6 +31,7 @@ export const PRIORITY_LOW:number =    5000000;
 
 export class ShopifyTaskRequest<T> {
   task:ShopifyTask<T>;
+  targetToken:IShopifyToken;
   priority:number;
   queued:Date;
   token:ShopifyToken;
@@ -48,10 +49,11 @@ export class ShopifyTaskRequest<T> {
   maxRetries:number=3;
   try:number=0;
 
-  constructor(task:ShopifyTask<T>, priority?:number) {
+  constructor(task:ShopifyTask<T>, targetToken:IShopifyToken=null, priority:number=PRIORITY_MEDIUM) {
     if(!task) throw new Error("Invalid task supplied.");
     this.task = task;
-    this.priority = priority || PRIORITY_MEDIUM;
+    this.targetToken = targetToken;
+    this.priority = priority;
     this.queued = new Date();
   }
 

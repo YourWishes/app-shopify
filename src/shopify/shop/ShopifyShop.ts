@@ -22,7 +22,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import { isValidShopName } from '@yourwishes/shopify-utils';
-import { ShopifyToken } from './../token/';
+import { ShopifyToken, IShopifyToken } from './../token/';
 import { ShopifyTask, ShopifyTaskRequest, PRIORITY_HIGH } from './../task/';
 import { ShopifyModule } from '~module';
 import { WebhookManager } from './../webhook/';
@@ -102,14 +102,19 @@ export class ShopifyShop {
     let availableTokens = this.tokens.filter(token => token.isAvailable());
     if(!availableTokens.length) return this.isChecking = false;
 
-
-
     availableTokens.forEach(token => {
       if(!tasks.length || !this.queuedTasks.length) return;
 
+      let i = 0;
       while(true) {
-        let task = tasks.shift();
+        let task = tasks[i++];
         if(!task) break;
+
+        //If this specific task has a token restriction, let's enforce it.
+        if(task.targetToken && token.token != task.targetToken) continue;
+
+        //Task can exec, let's do so.
+        task = tasks.shift(), i = 0;
         let index = this.queuedTasks.indexOf(task);
         if(index !== -1) this.queuedTasks.splice(index, 1);
 
@@ -133,17 +138,29 @@ export class ShopifyShop {
     this.checkPending();
   }
 
-  queue<T>(task:ShopifyTask<T>, priority?:number) {
-    let request = new ShopifyTaskRequest<T>(task, priority);
+  //Queuing functions.
+  queueToken<T>(task:ShopifyTask<T>, token:IShopifyToken, priority?:number) {
+    //Supply an apiKey to enforce that token receives the task.
+    let request = new ShopifyTaskRequest<T>(task, token, priority);
     this.queuedTasks.push(request);
     this.checkPending();
     return request;
   }
 
-  async call<T>(task:ShopifyTask<T>, priority?:number) {
+  queue<T>(task:ShopifyTask<T>, priority?:number) { return this.queueToken(task, null, priority); }
+
+  //Calling Functions
+  async callToken<T>(task:ShopifyTask<T>, token:IShopifyToken, priority?:number) {
     //Essentially a "queue, wait, and then return my result"
-    let request = this.queue<T>(task, priority);
+    let request = this.queueToken<T>(task, token, priority);
     return await request.wait();
+  }
+
+  call<T>(task:ShopifyTask<T>, priority?:number) { return this.callToken<T>(task, null, priority); }
+
+  callPrimary<T>(task:ShopifyTask<T>, priority?:number) {
+    if(!this.tokens.length) throw new Error(`Can't queue primary when there are no available tokens!`);
+    return this.callToken<T>(task, this.tokens[0].token, priority);
   }
 
   //============= Events =============//

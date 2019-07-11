@@ -164,4 +164,28 @@ describe('queue', () => {
   });
 });
 
+describe('queueToken', () => {
+  it('should force a task to go to the specified token only.', () => {
+    let shop = new ShopifyShop(DummyModule, DummyName);
+
+    let tokenA = new ShopifyToken(shop, {accessToken:'1234'});
+    let tokenB = new ShopifyToken(shop,{accessToken:'5678'});
+
+    //Mock available
+    tokenA.isAvailable = tokenB.isAvailable = () => true;
+
+    shop.addToken(tokenA);
+    shop.addToken(tokenB);
+
+    let fnNon = jest.fn(token => true);
+    let fnSpec = jest.fn(token => true);
+
+    let notSpecific = shop.queue(async token => fnNon(token));
+    let specific = shop.queueToken(async token => fnSpec(token), tokenB.token);
+
+    expect(fnNon).toHaveBeenCalledWith(tokenA);
+    expect(fnSpec).toHaveBeenCalledWith(tokenB);
+  });
+});
+
 //describe('call');//See ShopifyToken.wait()
