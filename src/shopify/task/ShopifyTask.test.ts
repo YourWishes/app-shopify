@@ -27,9 +27,16 @@ describe('ShopifyTaskRequest', () => {
     expect(() => new ShopifyTaskRequest(DummyTask)).not.toThrow();
   });
 
+  it('should allow a specific token to be supplied', () => {
+    let tokenA = { apiKey: 'a', password: 'a' };
+    let tokenB = { apiKey: 'b', password: 'b' };
+    expect(new ShopifyTaskRequest(DummyTask, tokenA)).toHaveProperty('targetToken', tokenA);
+    expect(new ShopifyTaskRequest(DummyTask, tokenB)).toHaveProperty('targetToken', tokenB);
+  });
+
   it('should allow a custom priority to be set', () => {
-    expect(new ShopifyTaskRequest(DummyTask, PRIORITY_LOW)).toHaveProperty('priority', PRIORITY_LOW);
-    expect(new ShopifyTaskRequest(DummyTask, PRIORITY_MEDIUM)).toHaveProperty('priority', PRIORITY_MEDIUM);
+    expect(new ShopifyTaskRequest(DummyTask, null, PRIORITY_LOW)).toHaveProperty('priority', PRIORITY_LOW);
+    expect(new ShopifyTaskRequest(DummyTask, null, PRIORITY_MEDIUM)).toHaveProperty('priority', PRIORITY_MEDIUM);
   });
 
   it('should set the queued time', () => {
