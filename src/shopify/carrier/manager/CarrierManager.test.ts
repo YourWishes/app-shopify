@@ -63,7 +63,7 @@ describe('hasCarrier', () => {
   it('should poll Shopify for the carriers', async () => {
     let shop = new ShopifyShop(DummyApp.shopify, 'test.myshopify.com');
     let fn = jest.fn();
-    shop.call = async prom => { fn(); return  await callMock(prom); };
+    shop.callPrimary = async prom => { fn(); return  await callMock(prom); };
     let mgr = new CarrierManager(shop);
 
     expect(fn).not.toHaveBeenCalled();
@@ -73,7 +73,7 @@ describe('hasCarrier', () => {
 
   it('should return true if the carrier is in the list of registered carriers', async () => {
     let shop = new ShopifyShop(DummyApp.shopify, 'test.myshopify.com');
-    shop.call = async prom => callMock(prom);
+    shop.callPrimary = async prom => callMock(prom);
     let mgr = new CarrierManager(shop);
 
     await expect(mgr.hasCarrier('test1')).resolves.toBeTruthy();
@@ -83,7 +83,7 @@ describe('hasCarrier', () => {
 
   it('should return false if the carrier is not in the list of registered carriers', async () => {
     let shop = new ShopifyShop(DummyApp.shopify, 'test.myshopify.com');
-    shop.call = async prom => await callMock(prom);
+    shop.callPrimary = async prom => await callMock(prom);
     let mgr = new CarrierManager(shop);
 
     await expect(mgr.hasCarrier('test4')).resolves.toBeFalsy()

@@ -49,7 +49,7 @@ export class CarrierManager {
 
     //Get carriers
     let carriers = await this.shop.callPrimary(token => token.api.carrierService.list());
-    let carrier = carriers.find(c => c.callback_url.startsWith(this.shop.shopify.host));
+    let carrier = carriers.find(c => c.name == name && c.callback_url);
 
     //Verify the URL, if the url doesn't match we may need to do a remove
     if(carrier && !carrier.callback_url.endsWith(handlerPath)) {
