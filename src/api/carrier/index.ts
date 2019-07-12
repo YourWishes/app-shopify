@@ -52,8 +52,9 @@ export class CarrierHandler extends ServerAPIHandler {
     //to cause Shopify to claim our callbacks are failing.
     let handler = async (listener:CarrierListener) => {
       try {
-        let response = await listener(shop, data);
-        return Array.isArray(response) ? response : [ response ];//Always array
+        let response = (await listener(shop, data)) || [];
+        response = Array.isArray(response) ? response : [ response ];//Always array
+        return response.filter(e => e);//Filter junk
       } catch(e) {
         shop.shopify.logger.severe(e);
         return [];//Return empty array
