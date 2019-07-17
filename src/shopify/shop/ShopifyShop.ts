@@ -34,6 +34,10 @@ export interface FetchableParams {
   limit?:number
 };
 
+export interface FetchableIdsParams extends FetchableParams {
+  ids:number[]|string[]
+}
+
 export type FetchableResourceTypes = {
   blog:Shopify.IBlog,
   checkout:Shopify.ICheckout,
@@ -65,6 +69,8 @@ export type FetchableResourceTypes = {
 
 export type FetchableResource = $Keys<FetchableResourceTypes>;
 export type FetchableResourceMap<T extends FetchableResource> = $PropertyType<FetchableResourceTypes, T>;
+
+export const LIMIT_MAX = 250;
 
 export class ShopifyShop {
   shopName:string;
@@ -202,20 +208,61 @@ export class ShopifyShop {
   }
 
   //Advanced Calling Functions
-  async fetchAll<T extends FetchableResource>(resource:T, params:FetchableParams={}) {
+  async fetchAll<T extends FetchableResource,P extends FetchableParams = any>(resource:T, params?:P) {
+    if(!params) {
+      params = {} as P;
+    }
+
+    //Get type expected for the given resource
     type M = FetchableResourceMap<typeof resource>;
-    params.limit = params.limit || 250;
+
+    //Set the limit if not already set.
+    params.limit = params.limit || LIMIT_MAX;
+
+    //Convert to string
     let res = resource as string;
 
     //Fetch count
     let count:number = await this.call(token => token.api[res].count(params));
-    let pages = Math.ceil(count / params.limit);
+    let pages = Math.ceil(count / params.limit);//Now determine pages
+
+    //Make our buffer
     let resources:M[] = [];
+
+    //Fetch each page...
     for(let page = 1; page <= pages; page++) {
+      //Fetch...
       let pageResources:M[] = await this.call(token => token.api[res].list({ ...params, page }));
+      //Flatten...
       resources = [ ...resources, ...pageResources ];
     }
     return resources;
+  }
+
+  async fetchAllIds<T extends FetchableResource,P extends FetchableIdsParams = any>(resource:T, params:P) {
+    //Once again determine type based off resource
+    type M = FetchableResourceMap<typeof resource>;
+    let { limit, ids } = params;
+    if(!ids.length) return [];//Nothing to do?
+    limit = params.limit || LIMIT_MAX;//Set Limit if not already
+
+    //Determine the amount of calls we're going to have to do
+    let idCalls = Math.ceil(ids.length / limit);
+
+    //Create a buffer
+    let stuff:M[] = [];
+
+    //Fetch each set of IDs, since there's a limit per call this is how we're
+    //going to do it.
+    for(let call = 0; call < idCalls; call++) {
+      let fetchIds = [];
+      for(let x = call*limit; x < Math.min(ids.length, call*limit+call); x++) {
+        fetchIds.push(ids[x]);//Figure out and only do the IDs we can this time.
+      }
+      let s = await this.fetchAll<T,P>(resource, { ...params, ids: fetchIds });
+      stuff = [ ...stuff,...s ];//Fetch and append to buffer before returning
+    }
+    return stuff;
   }
 
   //============= Events =============//
