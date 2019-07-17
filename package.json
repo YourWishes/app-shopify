@@ -27,9 +27,9 @@
   "homepage": "https://github.com/YourWishes/app-shopify#readme",
   "devDependencies": {
     "@types/jest": "^24.0.15",
-    "@zerollup/ts-transform-paths": "^1.7.3",
     "@yourwishes/app-database": "^2.2.2",
     "@yourwishes/app-server": "^2.1.4",
+    "@zerollup/ts-transform-paths": "^1.7.3",
     "jest": "^24.8.0",
     "ts-jest": "^24.0.2",
     "typescript": "^3.5.3"
