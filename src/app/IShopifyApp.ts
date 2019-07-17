@@ -28,9 +28,7 @@ import { ShopifyModule } from '~module';
 import { ShopifyShop } from '~shopify';
 import { Optional, Assign } from 'utility-types';
 
-export interface IShopifyApp extends Assign<
-  Assign<Optional<IServerApp>, Optional<IDatabaseApp>>, IApp
->  {
+export interface IShopifyApp extends IServerApp, IDatabaseApp {
   shopify:ShopifyModule;
 
   getShopifyScopes(shop:string):string[];
