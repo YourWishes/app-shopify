@@ -23,6 +23,8 @@
 
 import { Module, NPMPackage } from '@yourwishes/app-base';
 import { generateInstallUrl, isValidShopName } from '@yourwishes/shopify-utils';
+import { IServerApp } from '@yourwishes/app-server';
+import { IDatabaseApp } from '@yourwishes/app-database';
 
 import { IShopifyApp } from '~app';
 import { shopAuth, getInstallUrl, WebhookHandler } from '~api';
@@ -74,7 +76,11 @@ export class ShopifyModule extends Module {
     //Confirm Modules
     let { app } = this;
 
-    this.hasDatabase = app.database && app.database.isConnected();
+    //Temporarily ignoring these two until they've updated.
+    let dbApp = app as IDatabaseApp;
+    let svApp = app as IServerApp;
+
+    this.hasDatabase = dbApp.database && dbApp.database.isConnected();
     if(!this.hasDatabase) this.logger.warn(`Database is not connected. Shopify tokens cannot be stored!`);
 
     //Confirm Configuration
@@ -104,11 +110,11 @@ export class ShopifyModule extends Module {
 
     //Run our create queries.
     if(this.hasDatabase) {
-      await createNoncesTable(app.database);
-      await createTokensTable(app.database);
+      await createNoncesTable(dbApp.database);
+      await createTokensTable(dbApp.database);
 
       //Loud our stores
-      let tokens = await getAccessTokens(app.database);
+      let tokens = await getAccessTokens(dbApp.database);
       tokens.forEach(token => {
         try {
           let shop = this.getOrCreateShop(token.shop);
@@ -126,7 +132,7 @@ export class ShopifyModule extends Module {
     }
 
     //Load API Handlers
-    if(app.server) {
+    if(svApp.server) {
       this.shopAuthHandler = new shopAuth(this.authorize);
       this.getInstallUrlHandler = new getInstallUrl();
 
@@ -136,7 +142,7 @@ export class ShopifyModule extends Module {
       //Register API Handlers
       [
         this.shopAuthHandler, this.getInstallUrlHandler, ...this.webhookHandlers
-      ].forEach( handler => app.server.api.addAPIHandler(handler) );
+      ].forEach( handler => svApp.server.api.addAPIHandler(handler) );
 
     } else {
       this.logger.warn(`Server Module not available, endpoits will not function.`);

@@ -21,12 +21,50 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import * as Shopify from 'shopify-api-node';
 import { isValidShopName } from '@yourwishes/shopify-utils';
 import { ShopifyToken, IShopifyToken } from './../token/';
 import { ShopifyTask, ShopifyTaskRequest, PRIORITY_HIGH } from './../task/';
 import { ShopifyModule } from '~module';
 import { WebhookManager } from './../webhook/';
 import { CarrierManager } from './../carrier/';
+import { $Keys, $PropertyType } from 'utility-types';
+
+export interface FetchableParams {
+  limit?:number
+};
+
+export type FetchableResourceTypes = {
+  blog:Shopify.IBlog,
+  checkout:Shopify.ICheckout,
+  collect:Shopify.ICollect,
+  collectionListing:Shopify.ICollectionListing,
+  comment:Shopify.IComment,
+  country:Shopify.ICountry,
+  customCollection:Shopify.ICustomCollection,
+  customer:Shopify.ICustomer,
+  customerSavedSearch:Shopify.ICustomerSavedSearch,
+  discountCode:Shopify.IDiscountCode,
+  draftOrder:Shopify.IDraftOrder,
+  event:Shopify.IEvent,
+  giftCard:Shopify.IGiftCard,
+  location:Shopify.ILocation,
+  marketingEvent:Shopify.IMarketingEvent,
+  metafield:Shopify.IMetafield,
+  order:Shopify.IOrder,
+  page:Shopify.IPage,
+  priceRule:Shopify.IPriceRule,
+  product:Shopify.IProduct,
+  productListing:Shopify.IProductListing,
+  redirect:Shopify.IRedirect,
+  report:Shopify.IReport,
+  scriptTag:Shopify.IScriptTag,
+  smartCollection:Shopify.ISmartCollection,
+  webhook:Shopify.IWebhook
+}
+
+export type FetchableResource = $Keys<FetchableResourceTypes>;
+export type FetchableResourceMap<T extends FetchableResource> = $PropertyType<FetchableResourceTypes, T>;
 
 export class ShopifyShop {
   shopName:string;
@@ -161,6 +199,23 @@ export class ShopifyShop {
   callPrimary<T>(task:ShopifyTask<T>, priority?:number) {
     if(!this.tokens.length) throw new Error(`Can't queue primary when there are no available tokens!`);
     return this.callToken<T>(task, this.tokens[0].token, priority);
+  }
+
+  //Advanced Calling Functions
+  async fetchAll<T extends FetchableResource>(resource:T, params:FetchableParams={}) {
+    type M = FetchableResourceMap<typeof resource>;
+    params.limit = params.limit || 250;
+    let res = resource as string;
+
+    //Fetch count
+    let count:number = await this.call(token => token.api[res].count(params));
+    let pages = Math.ceil(count / params.limit);
+    let resources:M[] = [];
+    for(let page = 1; page <= pages; page++) {
+      let pageResources:M[] = await this.call(token => token.api[res].list({ ...params, page }));
+      resources = [ ...resources, ...pageResources ];
+    }
+    return resources;
   }
 
   //============= Events =============//
