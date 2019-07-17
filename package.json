@@ -27,8 +27,6 @@
   "homepage": "https://github.com/YourWishes/app-shopify#readme",
   "devDependencies": {
     "@types/jest": "^24.0.15",
-    "@yourwishes/app-database": "^2.2.2",
-    "@yourwishes/app-server": "^2.1.4",
     "@zerollup/ts-transform-paths": "^1.7.3",
     "jest": "^24.8.0",
     "ts-jest": "^24.0.2",
@@ -36,6 +34,8 @@
   },
   "dependencies": {
     "@yourwishes/app-base": "^2.2.4",
+    "@yourwishes/app-database": "^2.2.2",
+    "@yourwishes/app-server": "^2.1.4",
     "@yourwishes/shopify-utils": "^1.0.5",
     "cross-fetch": "^3.0.4",
     "shopify-api-node": "^2.20.1",
