@@ -21,7 +21,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { ShopifyToken, IShopifyToken } from './../token/';
+import { ShopifyToken, IShopifyToken, TOKEN_RESET_COOLDOWN } from './../token/';
 
 export type ShopifyTask<T> = (token:ShopifyToken) => Promise<T>;
 
@@ -93,8 +93,6 @@ export class ShopifyTaskRequest<T> {
   }
 
   onTaskError(error:any) {
-    this.error = error;
-
     //Make a nice Shopify Error
     let e = error;
     if(error && error.response && error.response.body && error.response.body.errors) {
@@ -106,14 +104,17 @@ export class ShopifyTaskRequest<T> {
         //How many tries are we on?
         if(this.maxRetries && this.try >= this.maxRetries) {
           this.token.shop.shopify.logger.severe(`Max retries was reached for task #${this.id}!`);
+        } else {
+          this.stopTask();
+          return this.token.shop.retry(this);
         }
-        return this.token.shop.retry(this);
       }
 
       if(e.base) e = e.base;
       if(Array.isArray(e)) e = e.join('\n');
     }
 
+    this.error = error;
     if(this.reject) this.reject(e);
     this.stopTask();
     this.token.onTaskError(this);
