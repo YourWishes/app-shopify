@@ -21,12 +21,10 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { IApp } from '@yourwishes/app-base';
 import { IDatabaseApp } from '@yourwishes/app-database';
-import { IServerApp } from '@yourwishes/app-SERVER';
+import { IServerApp } from '@yourwishes/app-server';
 import { ShopifyModule } from '~module';
 import { ShopifyShop } from '~shopify';
-import { Optional, Assign } from 'utility-types';
 
 export interface IShopifyApp extends IServerApp, IDatabaseApp {
   shopify:ShopifyModule;
