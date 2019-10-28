@@ -137,7 +137,7 @@ export class ShopifyModule extends Module {
       this.getInstallUrlHandler = new getInstallUrl();
 
       //Setup webhook handlers
-      this.webhookHandlers = WebhookTypes.map(webhook => new WebhookHandler(webhook, `/shopify/${webhook}`));
+      this.webhookHandlers = WebhookTypes.map(webhook => new WebhookHandler(webhook, webhook));
 
       //Register API Handlers
       [

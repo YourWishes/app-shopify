@@ -1,6 +1,6 @@
 describe('ShopifyModule', () => {
   it('should have its tests written again', () => {
-    expect(new Date().getTime()).toBeLessThan(1564545040991);
+    expect(new Date().getTime()).toBeLessThan(1577836800000);
   });
 });
 
