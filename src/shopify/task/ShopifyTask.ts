@@ -140,7 +140,8 @@ export class ShopifyTaskRequest<T> {
     this.interval = setImmediate(() => this.checkTask());
 
     //Has it failed/succeeded?
-    if(this.result == null && this.error == null) return;
+    let isNorU = (r:any) => r === null || typeof r === typeof undefined;//isNorU
+    if(isNorU(this.result) && isNorU(this.error)) return;
     if(this.reject == null || this.resolve == null) return;
 
     //Yes, stop this worker

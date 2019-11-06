@@ -126,6 +126,7 @@ describe('wait', () => {
         await new Promise(resolve => setImmediate(resolve));
         mock();
       }
+      return "anything";
     };
     let req = new ShopifyTaskRequest(task);
 
@@ -147,7 +148,9 @@ describe('wait', () => {
   });
 
   it('should throw if the task throws', async () => {
-    let mock = jest.fn(() => { throw new Error(); });
+    let mock = jest.fn(() => {
+      throw new Error();
+    });
     let task = async () => {
       await new Promise(resolve => setImmediate(resolve));
       mock();
