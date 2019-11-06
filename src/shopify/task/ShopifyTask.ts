@@ -86,9 +86,10 @@ export class ShopifyTaskRequest<T> {
   }
 
   onTaskFinished(result:T) {
+    this.stopTask();
+    
     this.result = result;
     if(this.resolve) this.resolve(result);
-    this.stopTask();
     this.token.onTaskComplete(this);
   }
 
@@ -146,10 +147,11 @@ export class ShopifyTaskRequest<T> {
 
     //Yes, stop this worker
     this.stopTask();
-
+    
     //Reject/Resolve
     if(this.error) return this.reject(this.error);
-    return this.resolve(this.result);
+    this.resolve(this.result);
+    this.token.onTaskComplete(this);
   }
 
   stopTask() {
