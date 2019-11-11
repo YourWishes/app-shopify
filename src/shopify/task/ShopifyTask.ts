@@ -82,7 +82,9 @@ export class ShopifyTaskRequest<T> {
 
   shouldErrorRestart(e) {
     let ej = JSON.stringify(e).toLowerCase();
-    return ej.includes('calls per second') || ej.includes('too many requests');
+    return [
+      'calls per second', 'too many requests', 'econnreset', 'econnrefused'
+    ].some(x => ej.includes(x));
   }
 
   onTaskFinished(result:T) {
@@ -98,22 +100,22 @@ export class ShopifyTaskRequest<T> {
     let e = error;
     if(error && error.response && error.response.body && error.response.body.errors) {
       e = error.response.body.errors;
-
-      //Check the type of error, under certain conditions we're going to restart
-      //the task.
-      if(this.shouldErrorRestart(e)) {
-        //How many tries are we on?
-        if(this.maxRetries && this.try >= this.maxRetries) {
-          this.token.shop.shopify.logger.severe(`Max retries was reached for task #${this.id}!`);
-        } else {
-          this.stopTask();
-          return this.token.shop.retry(this);
-        }
-      }
-
-      if(e.base) e = e.base;
-      if(Array.isArray(e)) e = e.join('\n');
     }
+
+    //Check the type of error, under certain conditions we're going to restart
+    //the task.
+    if(this.shouldErrorRestart(e)) {
+      //How many tries are we on?
+      if(this.maxRetries && this.try >= this.maxRetries) {
+        this.token.shop.shopify.logger.severe(`Max retries was reached for task #${this.id}!`);
+      } else {
+        this.stopTask();
+        return this.token.shop.retry(this);
+      }
+    }
+
+    if(e.base) e = e.base;
+    if(Array.isArray(e)) e = e.join('\n');
 
     this.error = error;
     if(this.reject) this.reject(e);
