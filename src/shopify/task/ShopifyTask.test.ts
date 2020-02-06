@@ -148,23 +148,14 @@ describe('wait', () => {
   });
 
   it('should throw if the task throws', async () => {
-    let mock = jest.fn(() => {
-      throw new Error();
+    let mock = jest.fn(async () => {
+      throw new Error("Some error")
     });
-    let task = async () => {
-      await new Promise(resolve => setImmediate(resolve));
-      mock();
-    };
-    let req = new ShopifyTaskRequest(task);
+    let req = new ShopifyTaskRequest(mock);
 
-    let waiter = req.wait();
-    expect(mock).not.toHaveBeenCalled();
-    expect(() => req.start(DummyToken)).not.toThrow();
-
-    await new Promise(resolve => setImmediate(resolve));
-
+    req.start(DummyToken);
+    await expect(req.wait()).rejects.toThrow();
     expect(mock).toHaveBeenCalled();
-    await expect(waiter).rejects.toThrow();
   });
 
   it('should return the value from the task', async () => {

@@ -38,7 +38,7 @@
     "@yourwishes/app-server": "^2.1.4",
     "@yourwishes/shopify-utils": "^1.0.5",
     "cross-fetch": "^3.0.4",
-    "shopify-api-node": "^2.20.1",
+    "shopify-api-node": "^3.1.0",
     "ttypescript": "^1.5.7",
     "utility-types": "^3.7.0"
   }

@@ -80,7 +80,7 @@ export class ShopifyTaskRequest<T> {
     });
   }
 
-  shouldErrorRestart(e) {
+  shouldErrorRestart(e:any) {
     let ej = JSON.stringify(e).toLowerCase();
     return [
       'calls per second', 'too many requests', 'econnreset', 'econnrefused'

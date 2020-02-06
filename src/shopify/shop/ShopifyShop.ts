@@ -48,7 +48,6 @@ export type FetchableResourceTypes = {
   customCollection:Shopify.ICustomCollection,
   customer:Shopify.ICustomer,
   customerSavedSearch:Shopify.ICustomerSavedSearch,
-  discountCode:Shopify.IDiscountCode,
   draftOrder:Shopify.IDraftOrder,
   event:Shopify.IEvent,
   giftCard:Shopify.IGiftCard,
@@ -209,9 +208,7 @@ export class ShopifyShop {
 
   //Advanced Calling Functions
   async fetchAll<T extends FetchableResource,P extends FetchableParams = any>(resource:T, params?:P) {
-    if(!params) {
-      params = {} as P;
-    }
+    if(!params) params = {} as P;
 
     //Get type expected for the given resource
     type M = FetchableResourceMap<typeof resource>;
@@ -219,22 +216,20 @@ export class ShopifyShop {
     //Set the limit if not already set.
     params.limit = params.limit || LIMIT_MAX;
 
-    //Convert to string
-    let res = resource as string;
+    //Convert to string, helps with some typescript issues that are around
+    let res = resource as any as string;
 
-    //Fetch count
-    let count:number = await this.call(token => token.api[res].count(params));
-    let pages = Math.ceil(count / params.limit);//Now determine pages
-
-    //Make our buffer
+    //Make our buffer & params
     let resources:M[] = [];
+    let pageParams = { ...params };
 
     //Fetch each page...
-    for(let page = 1; page <= pages; page++) {
+    while(pageParams !== undefined) {
       //Fetch...
-      let pageResources:M[] = await this.call(token => token.api[res].list({ ...params, page }));
+      let pageResources:M[] = await this.call(token => token.api[res].list(pageParams));
+      pageParams = pageResources['nextPageParams'];
       //Flatten...
-      resources = [ ...resources, ...pageResources ];
+      resources.push(...pageResources);
     }
     return resources;
   }
