@@ -58,6 +58,7 @@ export class ShopifyToken {
     //Create API Connection
     this.api = new Shopify({
       ...token,
+      apiVersion: shop.shopify.apiVersion,
       shopName: shop.shopName
     });
     this.api.on('callLimits', (limits) => this.onLimitsAdjusted(limits));

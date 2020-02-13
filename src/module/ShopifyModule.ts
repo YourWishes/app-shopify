@@ -35,6 +35,7 @@ export const CONFIG_KEY = 'shopify.key';
 export const CONFIG_SECRET ='shopify.secret';
 export const CONFIG_HOST = 'shopify.host';
 export const CONFIG_AUTHORIZE = 'shopify.authorize';
+export const CONFIG_VERSION = 'shopify.apiVersion';
 
 export class ShopifyModule extends Module {
   app:IShopifyApp;
@@ -45,6 +46,7 @@ export class ShopifyModule extends Module {
   host:string;
   authorize:string;
   redirectUrl:string;
+  apiVersion?:string;
 
   //Stores
   hasDatabase:boolean = false;
@@ -92,6 +94,7 @@ export class ShopifyModule extends Module {
       //Set Configuration
       this.apiKey = app.config.get(CONFIG_KEY);
       this.apiSecret = app.config.get(CONFIG_SECRET);
+      this.apiVersion = app.config.get(CONFIG_VERSION);
 
       let host = app.config.get(CONFIG_HOST);
       if(!host.startsWith('http')) host = `https://${host}`;
