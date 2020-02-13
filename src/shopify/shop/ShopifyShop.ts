@@ -227,7 +227,7 @@ export class ShopifyShop {
     while(pageParams !== undefined) {
       //Fetch...
       let pageResources:M[] = await this.call(token => token.api[res].list(pageParams));
-      pageParams = pageResources['nextPageParams'];
+      pageParams = pageResources['nextPageParameters'];
       //Flatten...
       resources.push(...pageResources);
     }
