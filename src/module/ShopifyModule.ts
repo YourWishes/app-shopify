@@ -85,6 +85,9 @@ export class ShopifyModule extends Module {
     this.hasDatabase = dbApp.database && dbApp.database.isConnected();
     if(!this.hasDatabase) this.logger.warn(`Database is not connected. Shopify tokens cannot be stored!`);
 
+    //Load API Version for private keys
+    this.apiVersion = app.config.get(CONFIG_VERSION);
+
     //Confirm Configuration
     if(
       app.config.has(CONFIG_KEY) &&
@@ -94,7 +97,6 @@ export class ShopifyModule extends Module {
       //Set Configuration
       this.apiKey = app.config.get(CONFIG_KEY);
       this.apiSecret = app.config.get(CONFIG_SECRET);
-      this.apiVersion = app.config.get(CONFIG_VERSION);
 
       let host = app.config.get(CONFIG_HOST);
       if(!host.startsWith('http')) host = `https://${host}`;

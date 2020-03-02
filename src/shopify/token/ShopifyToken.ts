@@ -28,8 +28,8 @@ import { ShopifyTaskRequest } from './../task/';
 import { IShopifyApp } from '~app';
 import { insertToken, deleteToken } from '~queries';
 
-export interface IShopifyPublicToken { accessToken:string, scopes?:string[] };
-export interface IShopifyPrivateToken { apiKey:string, password:string, scopes?:string[] };
+export interface IShopifyPublicToken { accessToken:string, scopes?:string[], apiVersion?:string };
+export interface IShopifyPrivateToken { apiKey:string, password:string, scopes?:string[], apiVersion?:string };
 export type IShopifyToken = IShopifyPublicToken | IShopifyPrivateToken;
 
 //How often should we ping Shopify to see how many slots are free.
@@ -58,7 +58,7 @@ export class ShopifyToken {
     //Create API Connection
     this.api = new Shopify({
       ...token,
-      apiVersion: shop.shopify.apiVersion,
+      apiVersion: shop.shopify.apiVersion || token.apiVersion,
       shopName: shop.shopName
     });
     this.api.on('callLimits', (limits) => this.onLimitsAdjusted(limits));
