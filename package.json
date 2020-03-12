@@ -1,6 +1,6 @@
 {
   "name": "@yourwishes/app-shopify",
-  "version": "1.6.4",
+  "version": "1.6.5",
   "description": "Shopify Module for Shopify Apps using the App Framework",
   "main": "dist/index.js",
   "scripts": {
