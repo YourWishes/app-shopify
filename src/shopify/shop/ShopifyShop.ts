@@ -24,7 +24,7 @@
 import * as Shopify from 'shopify-api-node';
 import { isValidShopName } from '@yourwishes/shopify-utils';
 import { ShopifyToken, IShopifyToken } from './../token/';
-import { ShopifyTask, ShopifyTaskRequest, PRIORITY_HIGH } from './../task/';
+import { ShopifyTask, ShopifyTaskRequest, PRIORITY_HIGH, PRIORITY_MEDIUM } from './../task/';
 import { ShopifyModule } from '~module';
 import { WebhookManager } from './../webhook/';
 import { CarrierManager } from './../carrier/';
@@ -207,7 +207,7 @@ export class ShopifyShop {
   }
 
   //Advanced Calling Functions
-  async fetchAll<T extends FetchableResource,P extends FetchableParams = any>(resource:T, params?:P) {
+  async fetchAll<T extends FetchableResource,P extends FetchableParams = any>(resource:T, params?:P, priority:number=PRIORITY_MEDIUM) {
     if(!params) params = {} as P;
 
     //Get type expected for the given resource
@@ -226,7 +226,7 @@ export class ShopifyShop {
     //Fetch each page...
     while(pageParams !== undefined) {
       //Fetch...
-      let pageResources:M[] = await this.call(token => token.api[res].list(pageParams));
+      let pageResources:M[] = await this.call(token => token.api[res].list(pageParams), priority);
       pageParams = pageResources['nextPageParameters'];
       //Flatten...
       resources.push(...pageResources);
@@ -234,7 +234,7 @@ export class ShopifyShop {
     return resources;
   }
 
-  async fetchAllIds<T extends FetchableResource,P extends FetchableIdsParams = any>(resource:T, params:P) {
+  async fetchAllIds<T extends FetchableResource,P extends FetchableIdsParams = any>(resource:T, params:P, priority:number=PRIORITY_MEDIUM) {
     //Once again determine type based off resource
     type M = FetchableResourceMap<typeof resource>;
     let { limit, ids } = params;
@@ -254,7 +254,7 @@ export class ShopifyShop {
       for(let x = call*limit; x < Math.min(ids.length, call*limit+call); x++) {
         fetchIds.push(ids[x]);//Figure out and only do the IDs we can this time.
       }
-      let s = await this.fetchAll<T,P>(resource, { ...params, ids: fetchIds });
+      let s = await this.fetchAll<T,P>(resource, { ...params, ids: fetchIds }, priority);
       stuff = [ ...stuff,...s ];//Fetch and append to buffer before returning
     }
     return stuff;

@@ -118,6 +118,7 @@ describe('verify', () => {
     await expect(token.verify()).resolves.toEqual(true);
   });
 
+  /* 2020-03-12 - No longer fails if missing access permission 
   it('should fail if the token is missing scopes that are required by the app', async () => {
     let app = new DummyAppClass();
     let module = new ShopifyModule(app);
@@ -132,6 +133,7 @@ describe('verify', () => {
     await expect(token.verify()).resolves.toEqual(false);
     expect(mock).toHaveBeenCalled();
   });
+  */
 });
 
 describe('delete', () => {

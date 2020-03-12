@@ -89,7 +89,7 @@ export class ShopifyToken {
     if(this.processingTasks.length) return this.scopes;
 
     //Create a task for this token only, then start it
-    let task = new ShopifyTaskRequest((token) => token.api.accessScope.list());
+    let task = new ShopifyTaskRequest(token => token.api.accessScope.list());
     this.startTask(task);
 
     //Wait for it...
@@ -126,8 +126,10 @@ export class ShopifyToken {
     try {
       let scopes = await this.fetchAccessScopes();
       let app = this.shop.shopify.app as IShopifyApp;
-      if(!app.getShopifyScopes(this.shop.shopName).every(scope => scopes.indexOf(scope) !== -1)) {
-        throw new Error("Shop is missing the required scopes!");
+
+      let missingPermissions = app.getShopifyScopes(this.shop.shopName).filter(scope => scopes.indexOf(scope) === -1);
+      if(missingPermissions.length) {
+        this.shop.shopify.logger.warn(`Shop ${this.shop.shopName} has a token missing ${missingPermissions.join(', ')} permissions.`);
       }
       return true;
     } catch(e) {
@@ -137,13 +139,7 @@ export class ShopifyToken {
         'ENOTFOUND', 'ECONNRESET'
       ].some(c => e.code)) return false;
     }
-
-    //For some reason the token doesn't work (unverified)
-    try {
-      await this.delete();
-    } catch(ex) {
-      this.shop.shopify.logger.severe(ex);
-    }
+    
     return false;
   }
 
