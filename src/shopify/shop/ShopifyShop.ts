@@ -24,7 +24,7 @@
 import * as Shopify from 'shopify-api-node';
 import { isValidShopName } from '@yourwishes/shopify-utils';
 import { ShopifyToken, IShopifyToken } from './../token/';
-import { ShopifyTask, ShopifyTaskRequest, PRIORITY_HIGH, PRIORITY_MEDIUM } from './../task/';
+import { ShopifyTask, ShopifyTaskRequest, PRIORITY_HIGH, PRIORITY_MEDIUM, PRIORITY_FORCE } from './../task/';
 import { ShopifyModule } from '~module';
 import { WebhookManager } from './../webhook/';
 import { CarrierManager } from './../carrier/';
@@ -136,15 +136,41 @@ export class ShopifyShop {
     if(this.isChecking) return false;
     this.isChecking = true;
 
+    //Get tasks, sorted by priority
     let tasks = [...this.queuedTasks].sort((l,r) => {
       return l.priority - r.priority;
     });
+    
+    //Forced tasks
+    let forcedTasks = tasks.filter(t => t.priority <= PRIORITY_FORCE);
+    if(forcedTasks.length) {
+      forcedTasks.every(task => {
+        let token = this.tokens.find(t => t.getAvailableSlots() > 0);
+        if(!token) return false;
 
+        //Specific token restriction
+        if(task.targetToken && token.token != task.targetToken) return true;
+        
+        //Remove from pending lists
+        let index = this.queuedTasks.indexOf(task);
+        if(index !== -1) this.queuedTasks.splice(index, 1);
+        
+        index = tasks.indexOf(task);
+        if(index !== -1) tasks.splice(index, 1);
+        
+        //Add to processing list
+        this.processingTasks.push(task);
+        token.startTask(task);
+        return true;
+      });
+    }
+    
+    //Anything to do?
     if(!tasks.length) return this.isChecking = false;
 
+    //Fetch tokens we can use
     let availableTokens = this.tokens.filter(token => token.isAvailable());
     if(!availableTokens.length) return this.isChecking = false;
-
     availableTokens.forEach(token => {
       if(!tasks.length || !this.queuedTasks.length) return;
 

@@ -25,6 +25,7 @@ import { ShopifyToken, IShopifyToken, TOKEN_RESET_COOLDOWN } from './../token/';
 
 export type ShopifyTask<T> = (token:ShopifyToken) => Promise<T>;
 
+export const PRIORITY_FORCE:number = -50;
 export const PRIORITY_HIGH:number =   -1;
 export const PRIORITY_MEDIUM:number =  0;
 export const PRIORITY_LOW:number =     1;
